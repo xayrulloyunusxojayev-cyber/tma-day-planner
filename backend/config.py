@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-BOT_TOKEN = os.getenv("BOT_TOKEN", "8985992778:AAHx829I6VBKJTxE5ma6kJ9EbCmITcgHF68")
+BOT_TOKEN = os.getenv("BOT_TOKEN", "8758633147:AAHUeHdOuj5nKxbdNuEpZRv-3wGX6wWY96w")
 PORT = int(os.getenv("PORT", 8000))
 HOST = os.getenv("HOST", "0.0.0.0")
 DATABASE_PATH = os.getenv("DATABASE_PATH", "planner.db")

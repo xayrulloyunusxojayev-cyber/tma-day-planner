@@ -6,6 +6,6 @@ services:
     region: frankfurt
     envVars:
       - key: BOT_TOKEN
-        value: 8985992778:AAHx829I6VBKJTxE5ma6kJ9EbCmITcgHF68
+        value: 8758633147:AAHUeHdOuj5nKxbdNuEpZRv-3wGX6wWY96w
       - key: PORT
         value: 8000

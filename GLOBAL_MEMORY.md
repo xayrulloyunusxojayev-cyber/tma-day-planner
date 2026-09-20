@@ -6,8 +6,8 @@
 - **Дизайн:** Ультра-аккуратный, премиальный темный UI (стиль Linear / Apple Health / Fintech), идеальная типографика, тактильный отклик (Haptics), адаптивность под мобильные устройства.
 
 ## 2. Архитектура и технологии
-- **Bot Token:** `8985992778:AAHx829I6VBKJTxE5ma6kJ9EbCmITcgHF68`
-- **Bot Username:** `@xayrulo_bot`
+- **Bot Token:** `8758633147:AAHUeHdOuj5nKxbdNuEpZRv-3wGX6wWY96w`
+- **Bot Username:** `@hairu_app_bot` (Hairu Tracker)
 - **GitHub Repository:** `https://github.com/xayrulloyunusxojayev-cyber/tma-day-planner`
 - **Production URL (Render):** `https://tma-day-planner.onrender.com`
 - **Backend:** Python 3.13, FastAPI, aiogram 3.x, aiosqlite (SQLite), APScheduler.
