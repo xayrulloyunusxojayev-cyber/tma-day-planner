@@ -56,9 +56,14 @@ async def init_db():
                 is_active INTEGER DEFAULT 1,
                 timezone TEXT DEFAULT 'Asia/Tashkent',
                 last_triggered_date TEXT DEFAULT '',
-                updated_at TEXT
+                updated_at TEXT,
+                source TEXT DEFAULT 'all'
             )
         """)
+        try:
+            await db.execute("ALTER TABLE habit_alarms ADD COLUMN source TEXT DEFAULT 'all'")
+        except Exception:
+            pass
         await db.commit()
 
 async def upsert_user(user_id: int, username: str, first_name: str):
@@ -231,15 +236,25 @@ async def get_all_active_alarms():
                 })
             return alarms
 
-async def sync_user_alarms_db(user_id: int, timezone: str, alarms: list):
+async def sync_user_alarms_db(user_id: int, timezone: str, alarms: list, source: str = "all"):
     async with aiosqlite.connect(DATABASE_PATH) as db:
         now = datetime.now().isoformat()
-        await db.execute("DELETE FROM habit_alarms WHERE user_id = ?", (user_id,))
+        if source == "all":
+            await db.execute("DELETE FROM habit_alarms WHERE user_id = ?", (user_id,))
+        else:
+            await db.execute("DELETE FROM habit_alarms WHERE user_id = ? AND source = ?", (user_id, source))
         for a in alarms:
             alarm_id = f"{user_id}_{a['habit_id']}"
             await db.execute("""
-                INSERT INTO habit_alarms (id, user_id, habit_id, title, time_str, is_active, timezone, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO habit_alarms (id, user_id, habit_id, title, time_str, is_active, timezone, updated_at, source)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(id) DO UPDATE SET
+                    title=excluded.title,
+                    time_str=excluded.time_str,
+                    is_active=excluded.is_active,
+                    timezone=excluded.timezone,
+                    updated_at=excluded.updated_at,
+                    source=excluded.source
             """, (
                 alarm_id,
                 user_id,
@@ -248,7 +263,8 @@ async def sync_user_alarms_db(user_id: int, timezone: str, alarms: list):
                 a["time_str"],
                 1 if a.get("is_active", True) else 0,
                 timezone or "Asia/Tashkent",
-                now
+                now,
+                source
             ))
         await db.commit()
 

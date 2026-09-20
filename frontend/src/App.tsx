@@ -133,6 +133,7 @@ export function App() {
             user_id: user.id,
             timezone: tz,
             alarms: activeAlarms,
+            source: 'habits',
           }),
         });
       } catch (err) {

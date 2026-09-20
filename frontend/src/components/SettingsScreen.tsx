@@ -8,7 +8,7 @@ import {
   Check,
   Award
 } from 'lucide-react';
-import { triggerHaptic } from '../telegram';
+import { triggerHaptic, getTelegramUser } from '../telegram';
 import { Language, translations } from '../i18n/translations';
 
 interface SettingsScreenProps {
@@ -25,6 +25,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
   avatarUrl = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
 }) => {
   const t = translations[currentLang];
+  const user = getTelegramUser();
   const [soundEffects, setSoundEffects] = useState(true);
   const [hapticFeedback, setHapticFeedback] = useState(true);
 
@@ -53,7 +54,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           <div className="relative">
             <img
               src={avatarUrl}
-              alt={userName}
+              alt={user.first_name || userName}
               className="w-14 h-14 rounded-2xl object-cover border-2 border-sanctuary-border shadow-xs"
             />
             <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-sanctuary-green text-white flex items-center justify-center text-[10px] shadow-xs">
@@ -61,10 +62,15 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             </div>
           </div>
           <div>
-            <h2 className="text-lg font-black text-sanctuary-dark tracking-tight leading-snug">{userName}</h2>
-            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-950 border border-amber-300 mt-1">
-              {t.memberBadge}
-            </span>
+            <h2 className="text-lg font-black text-sanctuary-dark tracking-tight leading-snug">{user.first_name || userName}</h2>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-950 border border-amber-300">
+                {t.memberBadge}
+              </span>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-gray-100 text-gray-700 border border-gray-200">
+                ID: {user.id}
+              </span>
+            </div>
           </div>
         </div>
 

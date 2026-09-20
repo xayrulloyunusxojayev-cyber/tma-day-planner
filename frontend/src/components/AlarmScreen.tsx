@@ -139,6 +139,7 @@ export const AlarmScreen: React.FC<AlarmScreenProps> = ({ onOpenAddHabit, lang }
             user_id: user.id,
             timezone: tz,
             alarms: activeList,
+            source: 'alarms',
           }),
         });
       } catch (err) {

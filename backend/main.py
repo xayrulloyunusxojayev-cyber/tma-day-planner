@@ -66,6 +66,7 @@ class SyncAlarmsModel(BaseModel):
     user_id: int
     timezone: str = "Asia/Tashkent"
     alarms: List[HabitAlarmItem]
+    source: str = "all"
 
 bot_task = None
 
@@ -137,7 +138,8 @@ async def api_sync_alarms(data: SyncAlarmsModel):
     await sync_user_alarms_db(
         data.user_id,
         data.timezone,
-        [a.model_dump() for a in data.alarms]
+        [a.model_dump() for a in data.alarms],
+        source=data.source
     )
     return {"status": "ok", "count": len(data.alarms)}
 

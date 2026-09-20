@@ -51,6 +51,7 @@ async def cmd_start(message: types.Message):
 
     welcome_text = (
         f"🔥 <b>Добро пожаловать в Apex Day Planner, {user.first_name}!</b>\n\n"
+        f"🆔 <b>Твой Telegram ID:</b> <code>{user.id}</code> (сохранен для будильника ✅)\n\n"
         "Это не просто список дел. Это твой личный <b>Revenue & Time Accelerator</b>:\n\n"
         "⏰ <b>Умный будильник:</b> разбудит в нужную минуту и не даст проспать цели.\n"
         "📊 <b>Таблица слотов:</b> четкий тайм-блокинг с 06:00 до 23:00.\n"
@@ -62,6 +63,19 @@ async def cmd_start(message: types.Message):
         welcome_text,
         parse_mode="HTML",
         reply_markup=get_webapp_keyboard()
+    )
+
+@dp.message(Command("id"))
+async def cmd_id(message: types.Message):
+    user = message.from_user
+    if not user:
+        return
+    await message.answer(
+        f"🆔 <b>Твой Telegram ID:</b> <code>{user.id}</code>\n"
+        f"👤 <b>Имя:</b> {user.first_name}\n"
+        f"🌐 <b>Username:</b> @{user.username or 'не указан'}\n\n"
+        "Этот ID используется для отправки персональных будильников и напоминаний.",
+        parse_mode="HTML"
     )
 
 @dp.message(Command("today"))
