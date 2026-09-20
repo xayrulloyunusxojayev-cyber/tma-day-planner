@@ -102,6 +102,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Health check & Uptime monitoring
+@app.head("/")
+async def head_root():
+    return {"status": "ok"}
+
+@app.get("/health")
+@app.head("/health")
+@app.get("/ping")
+@app.head("/ping")
+async def health_check():
+    return {"status": "ok", "app": "Hairu", "uptime": "healthy"}
+
 # API Routes
 @app.get("/api/data")
 async def get_day_data(user_id: int, date: str):

@@ -22,7 +22,7 @@ def get_webapp_keyboard():
         inline_keyboard=[
             [
                 InlineKeyboardButton(
-                    text="⚡️ Открыть Day Planner & Revenue",
+                    text="🌿 Open Hairu",
                     web_app=WebAppInfo(url=WEBAPP_URL)
                 )
             ]
@@ -42,7 +42,7 @@ async def cmd_start(message: types.Message):
         await bot.set_chat_menu_button(
             chat_id=user.id,
             menu_button=MenuButtonWebApp(
-                text="🚀 Мой План",
+                text="Open Hairu",
                 web_app=WebAppInfo(url=WEBAPP_URL)
             )
         )
@@ -50,13 +50,15 @@ async def cmd_start(message: types.Message):
         logger.warning(f"Could not set menu button: {e}")
 
     welcome_text = (
-        f"🔥 <b>Добро пожаловать в Apex Day Planner, {user.first_name}!</b>\n\n"
-        f"🆔 <b>Твой Telegram ID:</b> <code>{user.id}</code> (сохранен для будильника ✅)\n\n"
-        "Это не просто список дел. Это твой личный <b>Revenue & Time Accelerator</b>:\n\n"
-        "⏰ <b>Умный будильник:</b> разбудит в нужную минуту и не даст проспать цели.\n"
-        "📊 <b>Таблица слотов:</b> четкий тайм-блокинг с 06:00 до 23:00.\n"
-        "💰 <b>Фокус на доходе (DPA):</b> каждая задача привязана к деньгам. Закрывай задачи — расти кассу.\n\n"
-        "Нажми кнопку ниже, чтобы открыть Mini App 👇"
+        f"🌿 <b>Добро пожаловать в Hairu, {user.first_name}!</b>\n\n"
+        "<b>Hairu</b> — твой персональный трекер привычек, утренних ритуалов и ежедневной дисциплины.\n\n"
+        "✨ <b>Чем полезен Hairu каждый день:</b>\n"
+        "• <b>Осознанность и баланс:</b> структурируй утро, день и вечер без хаоса и выгорания.\n"
+        "• <b>Умный будильник & Ритуалы:</b> бот отправляет персональные звуковые сигналы прямо в Telegram в точное время или интервал.\n"
+        "• <b>Серии побед (Streak):</b> отслеживай непрерывность выполнения и получай награды за стабильность.\n"
+        "• <b>Интерактивный календарь:</b> удобный контроль привычек и истории достижений.\n\n"
+        "<i>«Маленькие осознанные шаги каждый день создают непреодолимый результат.»</i>\n\n"
+        "Нажми кнопку ниже, чтобы открыть приложение 👇"
     )
 
     await message.answer(
@@ -166,7 +168,7 @@ async def send_habit_alarm(user_id: int, habit_id: str, alarm_id: str, title: st
             ],
             [
                 InlineKeyboardButton(
-                    text="⚡️ Открыть Day Planner",
+                    text="🌿 Open Hairu",
                     web_app=WebAppInfo(url=WEBAPP_URL)
                 )
             ]
