@@ -13,12 +13,14 @@ import { Habit } from '../types';
 import { triggerHaptic } from '../telegram';
 import { alarmAudio } from '../audio';
 import { getCurrentWeekDays } from '../utils/calendar';
+import { Language, translations } from '../i18n/translations';
 
 interface HomeScreenProps {
   habits: Habit[];
   onToggleHabit: (id: string) => void;
   onIncrementSteps: (id: string) => void;
   userName?: string;
+  lang: Language;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
@@ -26,11 +28,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onToggleHabit,
   onIncrementSteps,
   userName = 'Hayrullo',
+  lang,
 }) => {
+  const t = translations[lang];
   const [activeFilter, setActiveFilter] = useState<'all' | 'morning' | 'afternoon' | 'evening'>('all');
-  const weekDays = getCurrentWeekDays();
+  const weekDays = getCurrentWeekDays(lang);
 
-  const todayStr = new Date().toLocaleDateString('ru-RU', {
+  const locale = lang === 'uz' ? 'uz-UZ' : lang === 'en' ? 'en-US' : 'ru-RU';
+  const todayStr = new Date().toLocaleDateString(locale, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -64,6 +69,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     }
   };
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return t.greetingMorning;
+    if (hour < 18) return t.greetingDay;
+    return t.greetingEvening;
+  };
+
   return (
     <div className="px-4 pb-24 space-y-4">
       {/* Date & Greeting */}
@@ -72,7 +84,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           {todayStr}
         </span>
         <h1 className="text-3xl font-black tracking-tight text-sanctuary-dark">
-          Привет, {userName}
+          {getGreeting()}, {userName}
         </h1>
       </div>
 
@@ -81,13 +93,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         <div className="flex items-center justify-between">
           <div className="space-y-1.5">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-amber-100/90 text-amber-950 border border-amber-300/60 shadow-2xs">
-              <Flame className="w-3.5 h-3.5 text-amber-600 fill-amber-500" /> 14 дней подряд
+              <Flame className="w-3.5 h-3.5 text-amber-600 fill-amber-500" /> 14 {t.streakDays}
             </span>
             <h2 className="text-xl font-black text-sanctuary-dark pt-0.5 tracking-tight">
-              Прогресс дня
+              {t.todayProgressTitle}
             </h2>
             <p className="text-xs font-semibold text-sanctuary-muted">
-              Выполнено <span className="text-sanctuary-dark font-extrabold">{completedCount}</span> из <span className="text-sanctuary-dark font-extrabold">{totalCount}</span> ритуалов
+              {t.completedOf.replace('{completed}', completedCount.toString()).replace('{total}', totalCount.toString())}
             </p>
           </div>
 
@@ -124,14 +136,14 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       <div className="space-y-2">
         <div className="flex items-center justify-between text-xs font-bold px-1">
           <span className="text-sanctuary-dark font-black tracking-tight uppercase text-[11px]">
-            Текущая неделя
+            {t.thisWeekTitle}
           </span>
           <span className="text-sanctuary-green font-extrabold text-[11px] bg-emerald-100/70 px-2 py-0.5 rounded-full">
-            Живой календарь
+            {t.liveCalendarBadge}
           </span>
         </div>
 
-        <div className="grid grid-cols-7 gap-1.5 bg-white p-2.5 rounded-[22px] border border-sanctuary-border shadow-card">
+        <div className="grid grid-cols-7 gap-1.5 bg-white p-2.5 rounded-[22px] border-2 border-sanctuary-border shadow-card">
           {weekDays.map((item, idx) => (
             <div
               key={idx}
@@ -162,10 +174,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       {/* Filter Tabs */}
       <div className="flex items-center gap-1.5 overflow-x-auto text-xs pt-1">
         {[
-          { id: 'all', label: `Все (${habits.length})` },
-          { id: 'morning', label: 'Утро' },
-          { id: 'afternoon', label: 'День' },
-          { id: 'evening', label: 'Вечер' },
+          { id: 'all', label: `${t.filterAll} (${habits.length})` },
+          { id: 'morning', label: t.filterMorning },
+          { id: 'afternoon', label: t.filterAfternoon },
+          { id: 'evening', label: t.filterEvening },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -173,7 +185,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               triggerHaptic('selection');
               setActiveFilter(tab.id as any);
             }}
-            className={`px-3.5 py-1.5 rounded-full font-black text-[11px] transition btn-press border ${
+            className={`px-3.5 py-1.5 rounded-full font-black text-[11px] transition btn-press border-2 ${
               activeFilter === tab.id
                 ? 'bg-sanctuary-dark text-white border-sanctuary-dark shadow-sm'
                 : 'bg-white text-sanctuary-muted border-sanctuary-border hover:border-sanctuary-borderStrong'

@@ -10,16 +10,20 @@ import {
 import { Habit } from '../types';
 import { triggerHaptic } from '../telegram';
 import { getMonthDays, formatMonthYear, downloadIcsCalendar, formatDateKey } from '../utils/calendar';
+import { Language, translations } from '../i18n/translations';
 
 interface CalendarScreenProps {
   habits: Habit[];
   onToggleHabit: (id: string) => void;
+  lang: Language;
 }
 
 export const CalendarScreen: React.FC<CalendarScreenProps> = ({
   habits,
   onToggleHabit,
+  lang,
 }) => {
+  const t = translations[lang];
   const [currentDate, setCurrentDate] = useState(() => new Date());
   const [selectedDate, setSelectedDate] = useState(() => new Date());
 
@@ -51,6 +55,7 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
   };
 
   const completedCount = habits.filter((h) => h.isCompleted).length;
+  const locale = lang === 'uz' ? 'uz-UZ' : lang === 'en' ? 'en-US' : 'ru-RU';
 
   return (
     <div className="px-4 pb-24 space-y-4">
@@ -58,10 +63,10 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
       <div className="pt-2 flex items-center justify-between">
         <div>
           <span className="text-[11px] font-bold uppercase tracking-wider text-sanctuary-muted block mb-1">
-            Интерактивный календарь
+            {t.interactiveCalendarSubtitle}
           </span>
           <h1 className="text-3xl font-black tracking-tight text-sanctuary-dark">
-            Календарь
+            {t.calendarTitle}
           </h1>
         </div>
 
@@ -72,16 +77,16 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
           title="Экспортировать в Календарь телефона (iCal / Google / Apple)"
         >
           <Download className="w-4 h-4 stroke-[2.5]" />
-          <span>В календарь</span>
+          <span>{t.exportToCalendarBtn}</span>
         </button>
       </div>
 
       {/* Real Month View (Bold & Clean) */}
-      <div className="sanctuary-card p-5 space-y-4">
+      <div className="sanctuary-card p-5 space-y-4 border-2 border-sanctuary-border">
         {/* Navigation */}
         <div className="flex items-center justify-between">
           <h3 className="font-black text-base text-sanctuary-dark capitalize tracking-tight">
-            {formatMonthYear(year, monthIndex)}
+            {formatMonthYear(year, monthIndex, lang)}
           </h3>
           <div className="flex items-center gap-1">
             <button
@@ -101,7 +106,7 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
 
         {/* Weekday Names */}
         <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-black text-sanctuary-muted uppercase tracking-wider">
-          {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map((d, i) => (
+          {t.weekDays.map((d, i) => (
             <div key={i}>{d}</div>
           ))}
         </div>
@@ -139,14 +144,14 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
       <div className="space-y-2.5">
         <div className="flex items-center justify-between text-xs px-1">
           <span className="font-black text-sanctuary-dark text-sm tracking-tight">
-            Расписание на{' '}
-            {selectedDate.toLocaleDateString('ru-RU', {
+            {t.scheduleFor}{' '}
+            {selectedDate.toLocaleDateString(locale, {
               day: 'numeric',
               month: 'long',
             })}
           </span>
           <span className="text-sanctuary-muted font-bold text-xs bg-gray-100 px-2 py-0.5 rounded-md">
-            {completedCount}/{habits.length}
+            {t.completedTasksCount.replace('{completed}', completedCount.toString()).replace('{total}', habits.length.toString())}
           </span>
         </div>
 

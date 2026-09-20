@@ -8,53 +8,54 @@ import { SettingsScreen } from './components/SettingsScreen';
 import { AddHabitModal } from './components/AddHabitModal';
 import { Habit } from './types';
 import { initTelegram, getTelegramUser, triggerHaptic } from './telegram';
+import { Language, translations } from './i18n/translations';
 
-const INITIAL_HABITS: Habit[] = [
+const getInitialHabits = (lang: Language): Habit[] => [
   {
     id: '1',
-    title: 'Morning Hydration',
+    title: lang === 'ru' ? 'Утренняя вода' : lang === 'uz' ? 'Ertalabki suv' : 'Morning Hydration',
     category: 'Health',
     timeOfDay: 'Morning',
-    subtitle: '1,000ml water • Wellness',
+    subtitle: '1,000ml • Wellness',
     streak: 14,
     isCompleted: true,
     icon: 'drop',
     color: 'sage',
-    alarmTime: '07:00 AM',
+    alarmTime: '07:00',
     alarmSound: 'Tibetan Bowl',
     alarmEnabled: true,
   },
   {
     id: '2',
-    title: 'Mindful Meditation',
+    title: lang === 'ru' ? 'Медитация / Намаз' : lang === 'uz' ? 'Meditatsiya / Namoz' : 'Mindful Meditation',
     category: 'Mindfulness',
     timeOfDay: 'Morning',
-    subtitle: '15 minutes • Mind',
+    subtitle: '15 min • Mind',
     streak: 9,
     isCompleted: true,
     icon: 'meditate',
     color: 'terracotta',
-    alarmTime: '07:45 AM',
+    alarmTime: '07:45',
     alarmSound: 'Forest Birds',
     alarmEnabled: true,
   },
   {
     id: '3',
-    title: 'Deep Reading',
+    title: lang === 'ru' ? 'Чтение книги / Коран' : lang === 'uz' ? 'Kitob o\'qish / Qur\'on' : 'Deep Reading',
     category: 'Productivity',
     timeOfDay: 'Morning',
-    subtitle: '20 pages read • Growth',
+    subtitle: '20 pages • Growth',
     streak: 21,
     isCompleted: true,
     icon: 'book',
     color: 'gold',
-    alarmTime: '12:30 PM',
+    alarmTime: '12:30',
     alarmSound: 'Soft Bell',
     alarmEnabled: true,
   },
   {
     id: '4',
-    title: 'Evening Nature Walk',
+    title: lang === 'ru' ? 'Вечерняя прогулка' : lang === 'uz' ? 'Kechki sayr' : 'Evening Nature Walk',
     category: 'Fitness',
     timeOfDay: 'Evening',
     subtitle: 'Target: 5,000 steps • Body',
@@ -65,21 +66,21 @@ const INITIAL_HABITS: Habit[] = [
     targetValue: 5000,
     currentValue: 3800,
     unit: 'steps',
-    alarmTime: '06:00 PM',
+    alarmTime: '18:00',
     alarmSound: 'Soft Bell',
     alarmEnabled: true,
   },
   {
     id: '5',
-    title: 'Digital Wind-Down',
+    title: lang === 'ru' ? 'Подготовка ко сну' : lang === 'uz' ? 'Uyquga tayyorgarlik' : 'Digital Wind-Down',
     category: 'Sleep',
     timeOfDay: 'Evening',
-    subtitle: 'By 10:00 PM • Rest & Sleep',
+    subtitle: '22:30 • Rest & Sleep',
     streak: 0,
     isCompleted: false,
     icon: 'moon',
     color: 'sand',
-    alarmTime: '10:00 PM',
+    alarmTime: '22:30',
     alarmSound: 'Muted',
     alarmEnabled: false,
   },
@@ -87,11 +88,21 @@ const INITIAL_HABITS: Habit[] = [
 
 export function App() {
   const user = getTelegramUser();
+  const [lang, setLang] = useState<Language>(() => {
+    const saved = localStorage.getItem('sanctuary_lang') as Language;
+    if (saved && (saved === 'ru' || saved === 'en' || saved === 'uz')) {
+      return saved;
+    }
+    return 'ru';
+  });
+
+  const t = translations[lang];
   const [currentTab, setCurrentTab] = useState<TabType>('home');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
   const [habits, setHabits] = useState<Habit[]>(() => {
-    const saved = localStorage.getItem('sanctuary_habits');
-    return saved ? JSON.parse(saved) : INITIAL_HABITS;
+    const saved = localStorage.getItem('sanctuary_habits_v3');
+    return saved ? JSON.parse(saved) : getInitialHabits(lang);
   });
 
   useEffect(() => {
@@ -99,8 +110,13 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('sanctuary_habits', JSON.stringify(habits));
+    localStorage.setItem('sanctuary_habits_v3', JSON.stringify(habits));
   }, [habits]);
+
+  const handleLanguageChange = (newLang: Language) => {
+    setLang(newLang);
+    localStorage.setItem('sanctuary_lang', newLang);
+  };
 
   const handleToggleHabit = (id: string) => {
     setHabits((prev) =>
@@ -138,7 +154,7 @@ export function App() {
   const handleSaveHabit = (newHabitData: Partial<Habit>) => {
     const newHabit: Habit = {
       id: Date.now().toString(),
-      title: newHabitData.title || 'New Ritual',
+      title: newHabitData.title || t.newRitualTitle,
       category: newHabitData.category || 'Mindfulness',
       timeOfDay: newHabitData.timeOfDay || 'Morning',
       subtitle: newHabitData.subtitle || 'Wellness',
@@ -149,7 +165,7 @@ export function App() {
       targetValue: newHabitData.targetValue,
       currentValue: 0,
       unit: newHabitData.unit || 'times',
-      alarmTime: newHabitData.alarmTime || '07:00 AM',
+      alarmTime: newHabitData.alarmTime || '07:00',
       alarmEnabled: true,
     };
     setHabits((prev) => [newHabit, ...prev]);
@@ -158,13 +174,13 @@ export function App() {
   const getHeaderSubtitle = () => {
     switch (currentTab) {
       case 'home':
-        return 'Home';
+        return t.navHome;
       case 'calendar':
-        return 'Calendar';
+        return t.navCalendar;
       case 'alarm':
-        return 'Alarm';
+        return t.navAlarm;
       case 'settings':
-        return 'Settings';
+        return t.navSettings;
     }
   };
 
@@ -173,7 +189,8 @@ export function App() {
       {/* Top Header */}
       <TopHeader
         subtitle={getHeaderSubtitle()}
-        userName={user.first_name || 'Sophia'}
+        userName={user.first_name || 'Hayrullo'}
+        lang={lang}
       />
 
       {/* Main Screen Content */}
@@ -183,7 +200,8 @@ export function App() {
             habits={habits}
             onToggleHabit={handleToggleHabit}
             onIncrementSteps={handleIncrementSteps}
-            userName={user.first_name || 'Sophia'}
+            userName={user.first_name || 'Hayrullo'}
+            lang={lang}
           />
         )}
 
@@ -191,16 +209,24 @@ export function App() {
           <CalendarScreen
             habits={habits}
             onToggleHabit={handleToggleHabit}
+            lang={lang}
           />
         )}
 
         {currentTab === 'alarm' && (
           <AlarmScreen
             onOpenAddHabit={() => setIsAddModalOpen(true)}
+            lang={lang}
           />
         )}
 
-        {currentTab === 'settings' && <SettingsScreen />}
+        {currentTab === 'settings' && (
+          <SettingsScreen
+            currentLang={lang}
+            onLanguageChange={handleLanguageChange}
+            userName={user.first_name || 'Hayrullo'}
+          />
+        )}
       </main>
 
       {/* Persistent Bottom Navigation */}
@@ -208,6 +234,7 @@ export function App() {
         currentTab={currentTab}
         onTabChange={setCurrentTab}
         onOpenAddModal={() => setIsAddModalOpen(true)}
+        lang={lang}
       />
 
       {/* Add Habit Modal (Screen 4) */}
@@ -215,6 +242,7 @@ export function App() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onSave={handleSaveHabit}
+        lang={lang}
       />
     </div>
   );

@@ -1,4 +1,5 @@
-// Real Dynamic Calendar Engine
+// Real Dynamic Calendar Engine with Multilingual Support
+import { Language, translations } from '../i18n/translations';
 
 export interface CalendarDay {
   date: Date;
@@ -44,7 +45,7 @@ export const getMonthDays = (year: number, monthIndex: number): CalendarDay[] =>
     });
   }
 
-  // Next month leading days to fill 35 or 42 grid
+  // Next month leading days to fill grid
   const remaining = (7 - (days.length % 7)) % 7;
   for (let i = 1; i <= remaining; i++) {
     const d = new Date(year, monthIndex + 1, i);
@@ -60,14 +61,14 @@ export const getMonthDays = (year: number, monthIndex: number): CalendarDay[] =>
   return days;
 };
 
-export const getCurrentWeekDays = (): { day: string; date: number; fullDate: Date; isToday: boolean }[] => {
+export const getCurrentWeekDays = (lang: Language = 'ru'): { day: string; date: number; fullDate: Date; isToday: boolean }[] => {
   const today = new Date();
   const currentDayOfWeek = today.getDay(); // 0=Sun, 1=Mon...
   const distanceToMonday = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
   const monday = new Date(today);
   monday.setDate(today.getDate() + distanceToMonday);
 
-  const dayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+  const dayNames = translations[lang].weekDays;
   const week = [];
 
   for (let i = 0; i < 7; i++) {
@@ -99,9 +100,10 @@ export const formatDateKey = (d: Date): string => {
   return `${y}-${m}-${day}`;
 };
 
-export const formatMonthYear = (year: number, monthIndex: number): string => {
+export const formatMonthYear = (year: number, monthIndex: number, lang: Language = 'ru'): string => {
   const d = new Date(year, monthIndex, 1);
-  return d.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' });
+  const locale = lang === 'uz' ? 'uz-UZ' : lang === 'en' ? 'en-US' : 'ru-RU';
+  return d.toLocaleDateString(locale, { month: 'long', year: 'numeric' });
 };
 
 // Export to .ics calendar file for Apple Calendar / Google Calendar / Outlook
@@ -142,7 +144,7 @@ export const downloadIcsCalendar = (habits: { title: string; alarmTime?: string 
       `DTEND:${endStr}`,
       `SUMMARY:${h.title}`,
       'RRULE:FREQ=DAILY',
-      'DESCRIPTION:Ритуал из Daily Sanctuary',
+      'DESCRIPTION:Daily Sanctuary Habit',
       'STATUS:CONFIRMED',
       'END:VEVENT'
     );

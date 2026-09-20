@@ -3,14 +3,11 @@ import {
   Clock,
   Play,
   Volume2,
-  Droplets,
-  BookOpen,
-  Footprints,
-  Smartphone,
   Plus
 } from 'lucide-react';
 import { triggerHaptic } from '../telegram';
 import { alarmAudio } from '../audio';
+import { Language, translations } from '../i18n/translations';
 
 interface AlarmItem {
   id: string;
@@ -22,82 +19,82 @@ interface AlarmItem {
   enabled: boolean;
 }
 
-const INITIAL_ALARMS: AlarmItem[] = [
-  {
-    id: '1',
-    time: '07:00',
-    title: 'Утренняя вода и зарядка',
-    schedule: 'Каждый день',
-    sound: 'Tibetan Bowl',
-    icon: 'drop',
-    enabled: true,
-  },
-  {
-    id: '2',
-    time: '07:45',
-    title: 'Медитация / Намаз',
-    schedule: 'Пн-Пт',
-    sound: 'Forest Birds',
-    icon: 'meditate',
-    enabled: true,
-  },
-  {
-    id: '3',
-    time: '14:00',
-    title: 'Разминка и фокус',
-    schedule: 'Пн-Пт',
-    sound: 'Gentle Chime',
-    icon: 'stretch',
-    enabled: true,
-  },
-  {
-    id: '4',
-    time: '18:00',
-    title: 'Вечерняя прогулка (шаги)',
-    schedule: 'Каждый день',
-    sound: 'Soft Bell',
-    icon: 'walk',
-    enabled: true,
-  },
-  {
-    id: '5',
-    time: '21:30',
-    title: 'Чтение книги / Коран',
-    schedule: 'Каждый день',
-    sound: 'Zen Gong',
-    icon: 'book',
-    enabled: true,
-  },
-  {
-    id: '6',
-    time: '22:30',
-    title: 'Подготовка ко сну',
-    schedule: 'Каждый день',
-    sound: 'Gentle',
-    icon: 'phone',
-    enabled: false,
-  },
-];
-
 interface AlarmScreenProps {
   onOpenAddHabit: () => void;
+  lang: Language;
 }
 
-export const AlarmScreen: React.FC<AlarmScreenProps> = ({ onOpenAddHabit }) => {
+export const AlarmScreen: React.FC<AlarmScreenProps> = ({ onOpenAddHabit, lang }) => {
+  const t = translations[lang];
+
+  const getInitialAlarms = (): AlarmItem[] => [
+    {
+      id: '1',
+      time: '07:00',
+      title: lang === 'ru' ? 'Утренняя вода и зарядка' : lang === 'uz' ? 'Ertalabki suv va badantarbiya' : 'Morning Hydration & Stretch',
+      schedule: t.everyday,
+      sound: 'Tibetan Bowl',
+      icon: 'drop',
+      enabled: true,
+    },
+    {
+      id: '2',
+      time: '07:45',
+      title: lang === 'ru' ? 'Медитация / Намаз' : lang === 'uz' ? 'Meditatsiya / Namoz' : 'Mindful Meditation',
+      schedule: t.weekdays,
+      sound: 'Forest Birds',
+      icon: 'meditate',
+      enabled: true,
+    },
+    {
+      id: '3',
+      time: '14:00',
+      title: lang === 'ru' ? 'Разминка и фокус' : lang === 'uz' ? 'Fokus va chigalyozdi' : 'Desk Stretch & Focus',
+      schedule: t.weekdays,
+      sound: 'Gentle Chime',
+      icon: 'stretch',
+      enabled: true,
+    },
+    {
+      id: '4',
+      time: '18:00',
+      title: lang === 'ru' ? 'Вечерняя прогулка (шаги)' : lang === 'uz' ? 'Kechki sayr (qadamlar)' : 'Evening Walk (steps)',
+      schedule: t.everyday,
+      sound: 'Soft Bell',
+      icon: 'walk',
+      enabled: true,
+    },
+    {
+      id: '5',
+      time: '21:30',
+      title: lang === 'ru' ? 'Чтение книги / Коран' : lang === 'uz' ? 'Kitob o\'qish / Qur\'on' : 'Deep Reading',
+      schedule: t.everyday,
+      sound: 'Zen Gong',
+      icon: 'book',
+      enabled: true,
+    },
+    {
+      id: '6',
+      time: '22:30',
+      title: lang === 'ru' ? 'Подготовка ко сну' : lang === 'uz' ? 'Uyquga tayyorgarlik' : 'Screen-Free Bedtime',
+      schedule: t.everyday,
+      sound: 'Gentle',
+      icon: 'phone',
+      enabled: false,
+    },
+  ];
+
   const [alarms, setAlarms] = useState<AlarmItem[]>(() => {
-    const saved = localStorage.getItem('sanctuary_alarms_simple');
-    return saved ? JSON.parse(saved) : INITIAL_ALARMS;
+    return getInitialAlarms();
   });
 
   const [isPlaying, setIsPlaying] = useState(false);
 
   const toggleAlarm = (id: string) => {
     triggerHaptic('impact', 'medium');
-    setAlarms((prev) => {
-      const updated = prev.map((a) => (a.id === id ? { ...a, enabled: !a.enabled } : a));
-      localStorage.setItem('sanctuary_alarms_simple', JSON.stringify(updated));
-      return updated;
-    });
+    setAlarms((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, enabled: !a.enabled } : a))
+    );
   };
 
   const handleTestSound = () => {
@@ -113,20 +110,20 @@ export const AlarmScreen: React.FC<AlarmScreenProps> = ({ onOpenAddHabit }) => {
       <div className="pt-2 flex items-center justify-between">
         <div>
           <span className="text-[11px] font-bold uppercase tracking-wider text-sanctuary-muted block mb-1">
-            Напоминания и подъем
+            {t.alarmSubtitle}
           </span>
           <h1 className="text-3xl font-black tracking-tight text-sanctuary-dark">
-            Будильники
+            {t.alarmTitle}
           </h1>
         </div>
 
         {/* Test Sound Button */}
         <button
           onClick={handleTestSound}
-          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border border-sanctuary-border text-xs font-black text-sanctuary-dark shadow-xs hover:bg-gray-50 transition btn-press"
+          className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white border-2 border-sanctuary-border text-xs font-black text-sanctuary-dark shadow-xs hover:bg-gray-50 transition btn-press"
         >
           <Volume2 className={`w-4 h-4 stroke-[2.5] ${isPlaying ? 'text-sanctuary-green animate-pulse' : ''}`} />
-          <span>Тест звука</span>
+          <span>{t.testSoundBtn}</span>
         </button>
       </div>
 
@@ -185,7 +182,7 @@ export const AlarmScreen: React.FC<AlarmScreenProps> = ({ onOpenAddHabit }) => {
         className="w-full py-4 rounded-2xl bg-sanctuary-green hover:bg-sanctuary-greenHover text-white font-black text-xs shadow-float-green transition btn-press flex items-center justify-center gap-2"
       >
         <Plus className="w-4 h-4 stroke-[3]" />
-        <span>Добавить напоминание</span>
+        <span>{t.addAlarmBtn}</span>
       </button>
     </div>
   );

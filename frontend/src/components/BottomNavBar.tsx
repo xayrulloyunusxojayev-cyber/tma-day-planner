@@ -1,6 +1,7 @@
 import React from 'react';
 import { Compass, Calendar, Plus, Bell, Sliders } from 'lucide-react';
 import { triggerHaptic } from '../telegram';
+import { Language, translations } from '../i18n/translations';
 
 export type TabType = 'home' | 'calendar' | 'alarm' | 'settings';
 
@@ -8,15 +9,19 @@ interface BottomNavBarProps {
   currentTab: TabType;
   onTabChange: (tab: TabType) => void;
   onOpenAddModal: () => void;
+  lang: Language;
 }
 
 export const BottomNavBar: React.FC<BottomNavBarProps> = ({
   currentTab,
   onTabChange,
   onOpenAddModal,
+  lang,
 }) => {
+  const t = translations[lang];
+
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t border-sanctuary-border px-5 py-2.5 max-w-md mx-auto shadow-lg shadow-black/5">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-xl border-t-2 border-sanctuary-border px-5 py-2.5 max-w-md mx-auto shadow-lg shadow-black/5">
       <div className="flex items-center justify-around relative">
         {/* Home */}
         <button
@@ -29,7 +34,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
           }`}
         >
           <Compass className={`w-5 h-5 ${currentTab === 'home' ? 'stroke-[2.8]' : 'stroke-2'}`} />
-          <span className="text-[10px] tracking-tight">Главная</span>
+          <span className="text-[10px] tracking-tight">{t.navHome}</span>
         </button>
 
         {/* Calendar */}
@@ -43,7 +48,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
           }`}
         >
           <Calendar className={`w-5 h-5 ${currentTab === 'calendar' ? 'stroke-[2.8]' : 'stroke-2'}`} />
-          <span className="text-[10px] tracking-tight">Календарь</span>
+          <span className="text-[10px] tracking-tight">{t.navCalendar}</span>
         </button>
 
         {/* Central Add (+) Button */}
@@ -53,7 +58,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
             onOpenAddModal();
           }}
           className="w-13 h-13 -mt-6 rounded-full bg-sanctuary-green hover:bg-sanctuary-greenHover text-white flex items-center justify-center shadow-float-green transition btn-press border-4 border-[#fbf9f5]"
-          title="Добавить ритуал"
+          title={t.newRitualTitle}
         >
           <Plus className="w-6 h-6 stroke-[3.2]" />
         </button>
@@ -69,7 +74,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
           }`}
         >
           <Bell className={`w-5 h-5 ${currentTab === 'alarm' ? 'stroke-[2.8]' : 'stroke-2'}`} />
-          <span className="text-[10px] tracking-tight">Будильник</span>
+          <span className="text-[10px] tracking-tight">{t.navAlarm}</span>
         </button>
 
         {/* Settings */}
@@ -83,7 +88,7 @@ export const BottomNavBar: React.FC<BottomNavBarProps> = ({
           }`}
         >
           <Sliders className={`w-5 h-5 ${currentTab === 'settings' ? 'stroke-[2.8]' : 'stroke-2'}`} />
-          <span className="text-[10px] tracking-tight">Настройки</span>
+          <span className="text-[10px] tracking-tight">{t.navSettings}</span>
         </button>
       </div>
     </nav>

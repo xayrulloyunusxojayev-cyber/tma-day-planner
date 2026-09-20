@@ -1,18 +1,23 @@
 import React from 'react';
 import { Search } from 'lucide-react';
 import { triggerHaptic } from '../telegram';
+import { Language, translations } from '../i18n/translations';
 
 interface TopHeaderProps {
   subtitle: string;
   userName?: string;
   avatarUrl?: string;
+  lang: Language;
 }
 
 export const TopHeader: React.FC<TopHeaderProps> = ({
   subtitle,
-  userName = 'Sophia',
+  userName = 'Hayrullo',
   avatarUrl = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+  lang,
 }) => {
+  const t = translations[lang];
+
   return (
     <header className="px-5 pt-4 pb-2 flex items-center justify-between">
       <div className="flex items-center gap-3">
@@ -24,7 +29,7 @@ export const TopHeader: React.FC<TopHeaderProps> = ({
         </div>
         <div>
           <span className="text-[10px] font-black uppercase tracking-wider text-sanctuary-muted block leading-none mb-0.5">
-            Daily Sanctuary
+            {t.appTitle}
           </span>
           <h2 className="text-lg font-black text-sanctuary-dark leading-tight capitalize tracking-tight">
             {subtitle}
