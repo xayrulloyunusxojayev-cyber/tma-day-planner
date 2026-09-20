@@ -7,7 +7,8 @@ import {
   Check,
   Flame,
   Plus,
-  Sparkles
+  Sparkles,
+  Edit2
 } from 'lucide-react';
 import { Habit } from '../types';
 import { triggerHaptic } from '../telegram';
@@ -19,6 +20,7 @@ interface HomeScreenProps {
   habits: Habit[];
   onToggleHabit: (id: string) => void;
   onIncrementSteps: (id: string) => void;
+  onEditHabit: (habit: Habit) => void;
   userName?: string;
   lang: Language;
 }
@@ -27,6 +29,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   habits,
   onToggleHabit,
   onIncrementSteps,
+  onEditHabit,
   userName = 'Hayrullo',
   lang,
 }) => {
@@ -196,83 +199,112 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         ))}
       </div>
 
-      {/* Habits List */}
+      {/* Habits List (Clean & Responsive layout without text truncation) */}
       <div className="space-y-2.5 pt-1">
         {filteredHabits.map((habit) => (
           <div
             key={habit.id}
-            className={`sanctuary-card p-4 flex items-center justify-between border-2 transition ${
+            className={`sanctuary-card p-4 flex flex-col gap-2.5 border-2 transition ${
               habit.isCompleted
                 ? 'border-sanctuary-green/25 bg-[#fafcfb]'
                 : 'border-sanctuary-border hover:border-sanctuary-borderStrong'
             }`}
           >
-            <div className="flex items-center gap-3.5 min-w-0">
-              <div className="w-12 h-12 rounded-[18px] bg-[#f4f1eb] border border-sanctuary-border flex items-center justify-center flex-shrink-0 shadow-inner-soft">
-                {renderIcon(habit.icon)}
-              </div>
-
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-extrabold text-sm text-sanctuary-dark truncate tracking-tight">
-                    {habit.title}
-                  </h3>
-                  {habit.alarmTime && (
-                    <span className="text-[10px] font-mono font-bold text-sanctuary-muted bg-gray-100 px-2 py-0.5 rounded-md border border-gray-200/60">
-                      {habit.alarmTime}
-                    </span>
-                  )}
+            {/* Top row: Icon, Title & Time, Edit & Checkbox */}
+            <div className="flex items-start justify-between gap-2.5">
+              {/* Clickable Area for Editing */}
+              <div
+                onClick={() => {
+                  triggerHaptic('impact', 'light');
+                  onEditHabit(habit);
+                }}
+                className="flex items-start gap-3 min-w-0 flex-1 cursor-pointer group"
+              >
+                <div className="w-12 h-12 rounded-[18px] bg-[#f4f1eb] border border-sanctuary-border flex items-center justify-center flex-shrink-0 shadow-inner-soft group-hover:scale-105 transition">
+                  {renderIcon(habit.icon)}
                 </div>
-                <p className="text-xs font-medium text-sanctuary-muted truncate mt-0.5">
-                  {habit.subtitle}
-                </p>
 
-                {habit.targetValue && habit.currentValue !== undefined && (
-                  <div className="mt-2 space-y-1">
-                    <div className="w-36 bg-gray-100 h-2 rounded-full overflow-hidden border border-gray-200/50">
-                      <div
-                        className="bg-gradient-to-r from-sanctuary-green to-emerald-600 h-full rounded-full transition-all duration-300"
-                        style={{
-                          width: `${Math.min(100, (habit.currentValue / habit.targetValue) * 100)}%`,
-                        }}
-                      />
-                    </div>
-                    <div className="text-[11px] font-bold text-sanctuary-dark">
-                      {habit.currentValue} <span className="text-sanctuary-muted font-normal">/ {habit.targetValue} {habit.unit}</span>
-                    </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <h3 className="font-extrabold text-sm text-sanctuary-dark tracking-tight leading-snug group-hover:text-sanctuary-green transition">
+                      {habit.title}
+                    </h3>
+                    {habit.alarmTime && (
+                      <span className="text-[10px] font-mono font-black text-sanctuary-muted bg-[#f4f1eb] px-2 py-0.5 rounded-md border border-sanctuary-border whitespace-nowrap">
+                        {habit.alarmTime}
+                      </span>
+                    )}
                   </div>
-                )}
+                  <p className="text-xs font-medium text-sanctuary-muted mt-0.5">
+                    {habit.subtitle}
+                  </p>
+                </div>
               </div>
-            </div>
 
-            <div className="flex items-center gap-2.5 flex-shrink-0">
-              {habit.targetValue && (
+              {/* Action Buttons: Edit, +500, Checkbox */}
+              <div className="flex items-center gap-1.5 flex-shrink-0 pt-0.5">
+                {/* Edit Button */}
                 <button
                   onClick={() => {
-                    triggerHaptic('impact', 'medium');
-                    onIncrementSteps(habit.id);
+                    triggerHaptic('impact', 'light');
+                    onEditHabit(habit);
                   }}
-                  className="px-3 py-2 rounded-xl bg-sanctuary-green hover:bg-sanctuary-greenHover text-white text-[11px] font-black flex items-center gap-1 shadow-sm btn-press"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-sanctuary-muted hover:text-sanctuary-dark hover:bg-black/5 transition btn-press"
+                  title="Редактировать или удалить"
                 >
-                  <Plus className="w-3.5 h-3.5 stroke-[3]" /> 500
+                  <Edit2 className="w-3.5 h-3.5 stroke-[2.5]" />
                 </button>
-              )}
 
-              <button
-                onClick={() => {
-                  triggerHaptic('notification', 'success');
-                  alarmAudio.playTone(880, 0.15, 0, 'sine');
-                  onToggleHabit(habit.id);
-                }}
-                className={`w-9 h-9 rounded-full flex items-center justify-center transition btn-press ${
-                  habit.isCompleted
-                    ? 'bg-sanctuary-green text-white shadow-md shadow-sanctuary-green/30 scale-105'
-                    : 'border-2 border-gray-300 hover:border-sanctuary-green bg-white'
-                }`}
-              >
-                {habit.isCompleted && <Check className="w-4 h-4 stroke-[3.5]" />}
-              </button>
+                {/* +500 Steps button */}
+                {habit.targetValue && (
+                  <button
+                    onClick={() => {
+                      triggerHaptic('impact', 'medium');
+                      onIncrementSteps(habit.id);
+                    }}
+                    className="px-2.5 py-1.5 rounded-xl bg-sanctuary-green hover:bg-sanctuary-greenHover text-white text-[10px] font-black flex items-center gap-1 shadow-sm btn-press whitespace-nowrap"
+                  >
+                    <Plus className="w-3 h-3 stroke-[3]" /> 500
+                  </button>
+                )}
+
+                {/* Complete Checkbox */}
+                <button
+                  onClick={() => {
+                    triggerHaptic('notification', 'success');
+                    alarmAudio.playTone(880, 0.15, 0, 'sine');
+                    onToggleHabit(habit.id);
+                  }}
+                  className={`w-9 h-9 rounded-full flex items-center justify-center transition btn-press ${
+                    habit.isCompleted
+                      ? 'bg-sanctuary-green text-white shadow-md shadow-sanctuary-green/30 scale-105'
+                      : 'border-2 border-gray-300 hover:border-sanctuary-green bg-white'
+                  }`}
+                >
+                  {habit.isCompleted && <Check className="w-4 h-4 stroke-[3.5]" />}
+                </button>
+              </div>
             </div>
+
+            {/* Progress bar if steps/metric exists */}
+            {habit.targetValue && habit.currentValue !== undefined && (
+              <div className="pl-15 pr-1 space-y-1">
+                <div className="w-full bg-gray-100 h-2 rounded-full overflow-hidden border border-gray-200/50">
+                  <div
+                    className="bg-gradient-to-r from-sanctuary-green to-emerald-600 h-full rounded-full transition-all duration-300"
+                    style={{
+                      width: `${Math.min(100, (habit.currentValue / habit.targetValue) * 100)}%`,
+                    }}
+                  />
+                </div>
+                <div className="text-[11px] font-bold text-sanctuary-dark flex items-center justify-between">
+                  <span>{habit.currentValue} / {habit.targetValue} {habit.unit}</span>
+                  <span className="text-[10px] font-black text-sanctuary-green">
+                    {Math.round((habit.currentValue / habit.targetValue) * 100)}%
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         ))}
       </div>

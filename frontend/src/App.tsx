@@ -21,7 +21,7 @@ const getInitialHabits = (lang: Language): Habit[] => [
     isCompleted: true,
     icon: 'drop',
     color: 'sage',
-    alarmTime: '07:00',
+    alarmTime: '07:00 - 07:30',
     alarmSound: 'Tibetan Bowl',
     alarmEnabled: true,
   },
@@ -35,7 +35,7 @@ const getInitialHabits = (lang: Language): Habit[] => [
     isCompleted: true,
     icon: 'meditate',
     color: 'terracotta',
-    alarmTime: '07:45',
+    alarmTime: '07:45 - 08:30',
     alarmSound: 'Forest Birds',
     alarmEnabled: true,
   },
@@ -49,7 +49,7 @@ const getInitialHabits = (lang: Language): Habit[] => [
     isCompleted: true,
     icon: 'book',
     color: 'gold',
-    alarmTime: '12:30',
+    alarmTime: '12:30 - 13:30',
     alarmSound: 'Soft Bell',
     alarmEnabled: true,
   },
@@ -66,7 +66,7 @@ const getInitialHabits = (lang: Language): Habit[] => [
     targetValue: 5000,
     currentValue: 3800,
     unit: 'steps',
-    alarmTime: '18:00',
+    alarmTime: '18:00 - 19:30',
     alarmSound: 'Soft Bell',
     alarmEnabled: true,
   },
@@ -75,12 +75,12 @@ const getInitialHabits = (lang: Language): Habit[] => [
     title: lang === 'ru' ? 'Подготовка ко сну' : lang === 'uz' ? 'Uyquga tayyorgarlik' : 'Digital Wind-Down',
     category: 'Sleep',
     timeOfDay: 'Evening',
-    subtitle: '22:30 • Rest & Sleep',
+    subtitle: 'Rest & Sleep',
     streak: 0,
     isCompleted: false,
     icon: 'moon',
     color: 'sand',
-    alarmTime: '22:30',
+    alarmTime: '22:30 - 23:00',
     alarmSound: 'Muted',
     alarmEnabled: false,
   },
@@ -99,9 +99,10 @@ export function App() {
   const t = translations[lang];
   const [currentTab, setCurrentTab] = useState<TabType>('home');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [habitToEdit, setHabitToEdit] = useState<Habit | null>(null);
 
   const [habits, setHabits] = useState<Habit[]>(() => {
-    const saved = localStorage.getItem('sanctuary_habits_v3');
+    const saved = localStorage.getItem('sanctuary_habits_v4');
     return saved ? JSON.parse(saved) : getInitialHabits(lang);
   });
 
@@ -110,7 +111,7 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('sanctuary_habits_v3', JSON.stringify(habits));
+    localStorage.setItem('sanctuary_habits_v4', JSON.stringify(habits));
   }, [habits]);
 
   const handleLanguageChange = (newLang: Language) => {
@@ -151,24 +152,46 @@ export function App() {
     );
   };
 
-  const handleSaveHabit = (newHabitData: Partial<Habit>) => {
-    const newHabit: Habit = {
-      id: Date.now().toString(),
-      title: newHabitData.title || t.newRitualTitle,
-      category: newHabitData.category || 'Mindfulness',
-      timeOfDay: newHabitData.timeOfDay || 'Morning',
-      subtitle: newHabitData.subtitle || 'Wellness',
-      streak: 1,
-      isCompleted: false,
-      icon: newHabitData.icon || 'drop',
-      color: newHabitData.color || 'sage',
-      targetValue: newHabitData.targetValue,
-      currentValue: 0,
-      unit: newHabitData.unit || 'times',
-      alarmTime: newHabitData.alarmTime || '07:00',
-      alarmEnabled: true,
-    };
-    setHabits((prev) => [newHabit, ...prev]);
+  const handleOpenAdd = () => {
+    setHabitToEdit(null);
+    setIsAddModalOpen(true);
+  };
+
+  const handleOpenEdit = (habit: Habit) => {
+    setHabitToEdit(habit);
+    setIsAddModalOpen(true);
+  };
+
+  const handleSaveHabit = (habitData: Partial<Habit>) => {
+    if (habitToEdit) {
+      setHabits((prev) =>
+        prev.map((h) =>
+          h.id === habitToEdit.id ? ({ ...h, ...habitData } as Habit) : h
+        )
+      );
+    } else {
+      const newHabit: Habit = {
+        id: Date.now().toString(),
+        title: habitData.title || t.newRitualTitle,
+        category: habitData.category || 'Mindfulness',
+        timeOfDay: habitData.timeOfDay || 'Morning',
+        subtitle: habitData.subtitle || 'Wellness',
+        streak: 1,
+        isCompleted: false,
+        icon: habitData.icon || 'drop',
+        color: habitData.color || 'sage',
+        targetValue: habitData.targetValue,
+        currentValue: 0,
+        unit: habitData.unit || 'times',
+        alarmTime: habitData.alarmTime || '07:30 - 09:00',
+        alarmEnabled: true,
+      };
+      setHabits((prev) => [newHabit, ...prev]);
+    }
+  };
+
+  const handleDeleteHabit = (habitId: string) => {
+    setHabits((prev) => prev.filter((h) => h.id !== habitId));
   };
 
   const getHeaderSubtitle = () => {
@@ -200,6 +223,7 @@ export function App() {
             habits={habits}
             onToggleHabit={handleToggleHabit}
             onIncrementSteps={handleIncrementSteps}
+            onEditHabit={handleOpenEdit}
             userName={user.first_name || 'Hayrullo'}
             lang={lang}
           />
@@ -215,7 +239,7 @@ export function App() {
 
         {currentTab === 'alarm' && (
           <AlarmScreen
-            onOpenAddHabit={() => setIsAddModalOpen(true)}
+            onOpenAddHabit={handleOpenAdd}
             lang={lang}
           />
         )}
@@ -233,15 +257,20 @@ export function App() {
       <BottomNavBar
         currentTab={currentTab}
         onTabChange={setCurrentTab}
-        onOpenAddModal={() => setIsAddModalOpen(true)}
+        onOpenAddModal={handleOpenAdd}
         lang={lang}
       />
 
-      {/* Add Habit Modal (Screen 4) */}
+      {/* Add / Edit Habit Modal */}
       <AddHabitModal
         isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setHabitToEdit(null);
+        }}
         onSave={handleSaveHabit}
+        onDelete={handleDeleteHabit}
+        habitToEdit={habitToEdit}
         lang={lang}
       />
     </div>

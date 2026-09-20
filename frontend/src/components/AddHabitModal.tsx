@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   X,
   Check,
@@ -9,9 +9,9 @@ import {
   Heart,
   Flower2,
   Clock,
-  Sparkles,
   Minus,
-  Plus
+  Plus,
+  Trash2
 } from 'lucide-react';
 import { Habit, HabitCategory } from '../types';
 import { triggerHaptic } from '../telegram';
@@ -21,6 +21,8 @@ interface AddHabitModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (habit: Partial<Habit>) => void;
+  onDelete?: (habitId: string) => void;
+  habitToEdit?: Habit | null;
   lang: Language;
 }
 
@@ -48,41 +50,90 @@ export const AddHabitModal: React.FC<AddHabitModalProps> = ({
   isOpen,
   onClose,
   onSave,
+  onDelete,
+  habitToEdit,
   lang,
 }) => {
   const t = translations[lang];
 
-  const [title, setTitle] = useState(lang === 'ru' ? 'Пить воду' : lang === 'uz' ? 'Suv ichish' : 'Drink Water');
+  const [title, setTitle] = useState('');
   const [selectedIcon, setSelectedIcon] = useState('drop');
   const [selectedColor, setSelectedColor] = useState('sage');
   const [selectedCategory, setSelectedCategory] = useState<HabitCategory>('Health');
   const [cadence, setCadence] = useState<'everyday' | 'weekdays'>('everyday');
   const [targetGoal, setTargetGoal] = useState(15);
   const [targetUnit, setTargetUnit] = useState('ml');
-  const [reminderEnabled, setReminderEnabled] = useState(true);
-  const [reminderTime, setReminderTime] = useState('07:30');
+  const [isTimeRange, setIsTimeRange] = useState(true);
+  const [timeFrom, setTimeFrom] = useState('07:30');
+  const [timeTo, setTimeTo] = useState('09:00');
+
+  useEffect(() => {
+    if (habitToEdit) {
+      setTitle(habitToEdit.title);
+      setSelectedIcon(habitToEdit.icon || 'drop');
+      setSelectedColor(habitToEdit.color || 'sage');
+      setSelectedCategory(habitToEdit.category || 'Health');
+      setTargetGoal(habitToEdit.targetValue || 15);
+      setTargetUnit(habitToEdit.unit || 'ml');
+
+      if (habitToEdit.alarmTime) {
+        if (habitToEdit.alarmTime.includes('-')) {
+          const parts = habitToEdit.alarmTime.split('-').map((p) => p.trim());
+          setTimeFrom(parts[0] || '07:30');
+          setTimeTo(parts[1] || '09:00');
+          setIsTimeRange(true);
+        } else {
+          setTimeFrom(habitToEdit.alarmTime);
+          setTimeTo('09:00');
+          setIsTimeRange(false);
+        }
+      }
+    } else {
+      setTitle(lang === 'ru' ? 'Пить воду' : lang === 'uz' ? 'Suv ichish' : 'Drink Water');
+      setSelectedIcon('drop');
+      setSelectedColor('sage');
+      setSelectedCategory('Health');
+      setTargetGoal(15);
+      setTargetUnit('ml');
+      setTimeFrom('07:30');
+      setTimeTo('09:00');
+      setIsTimeRange(true);
+    }
+  }, [habitToEdit, isOpen, lang]);
 
   if (!isOpen) return null;
 
   const handleSave = () => {
     if (!title.trim()) return;
     triggerHaptic('notification', 'success');
+
+    const formattedTime = isTimeRange ? `${timeFrom} - ${timeTo}` : timeFrom;
+
     onSave({
+      id: habitToEdit ? habitToEdit.id : undefined,
       title: title.trim(),
       category: selectedCategory,
       timeOfDay: 'Morning',
       subtitle: `${targetGoal}${targetUnit} • ${selectedCategory}`,
-      streak: 1,
-      isCompleted: false,
       icon: selectedIcon,
       color: selectedColor,
       targetValue: targetGoal,
-      currentValue: 0,
+      currentValue: habitToEdit ? habitToEdit.currentValue : 0,
       unit: targetUnit,
-      alarmTime: `${reminderTime}`,
-      alarmEnabled: reminderEnabled,
+      alarmTime: formattedTime,
+      alarmEnabled: true,
     });
     onClose();
+  };
+
+  const handleDelete = () => {
+    if (habitToEdit && onDelete) {
+      if (confirm(t.deleteConfirm)) {
+        triggerHaptic('notification', 'warning');
+        onDelete(habitToEdit.id);
+        onClose();
+      }
+    }
   };
 
   return (
@@ -101,11 +152,11 @@ export const AddHabitModal: React.FC<AddHabitModalProps> = ({
             onClick={handleSave}
             className="px-4 py-1.5 rounded-full bg-sanctuary-green hover:bg-sanctuary-greenHover text-white text-xs font-black flex items-center gap-1 shadow-sm btn-press"
           >
-            <span>{t.saveBtn}</span> <Check className="w-3.5 h-3.5 stroke-[3.5]" />
+            <span>{habitToEdit ? t.saveChangesBtn : t.saveBtn}</span> <Check className="w-3.5 h-3.5 stroke-[3.5]" />
           </button>
         </div>
 
-        {/* Title Input Card */}
+        {/* Title Card */}
         <div className="sanctuary-card p-5 space-y-3.5 border-2 border-sanctuary-border">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -114,7 +165,7 @@ export const AddHabitModal: React.FC<AddHabitModalProps> = ({
               </div>
               <div>
                 <span className="text-[10px] uppercase font-black text-sanctuary-green tracking-wider block">
-                  {t.newRitualTitle}
+                  {habitToEdit ? t.editRitualTitle : t.newRitualTitle}
                 </span>
                 <h3 className="font-black text-base text-sanctuary-dark tracking-tight">{title || t.habitNamePlaceholder}</h3>
               </div>
@@ -149,28 +200,96 @@ export const AddHabitModal: React.FC<AddHabitModalProps> = ({
           </div>
 
           {/* Inspirations */}
-          <div>
-            <span className="text-[11px] font-black text-sanctuary-muted block mb-1.5 uppercase tracking-wider">{t.inspirationsLabel}</span>
-            <div className="flex items-center gap-1.5 overflow-x-auto text-xs font-extrabold pb-1">
-              {[
-                { title: lang === 'ru' ? 'Пить воду' : lang === 'uz' ? 'Suv ichish' : 'Drink Water', icon: '💧' },
-                { title: lang === 'ru' ? 'Читать книгу' : lang === 'uz' ? 'Kitob o\'qish' : 'Read Book', icon: '📖' },
-                { title: lang === 'ru' ? 'Бег 3 км' : lang === 'uz' ? 'Yugurish 3km' : 'Run 3km', icon: '👟' },
-              ].map((insp) => (
-                <button
-                  key={insp.title}
-                  type="button"
-                  onClick={() => {
-                    triggerHaptic('selection');
-                    setTitle(insp.title);
-                  }}
-                  className="px-3 py-1.5 rounded-full bg-[#f4f1eb] hover:bg-[#ede8df] text-sanctuary-dark border border-sanctuary-border transition flex items-center gap-1.5 whitespace-nowrap btn-press"
-                >
-                  <span>{insp.icon}</span> {insp.title}
-                </button>
-              ))}
+          {!habitToEdit && (
+            <div>
+              <span className="text-[11px] font-black text-sanctuary-muted block mb-1.5 uppercase tracking-wider">{t.inspirationsLabel}</span>
+              <div className="flex items-center gap-1.5 overflow-x-auto text-xs font-extrabold pb-1">
+                {[
+                  { title: lang === 'ru' ? 'Пить воду' : lang === 'uz' ? 'Suv ichish' : 'Drink Water', icon: '💧' },
+                  { title: lang === 'ru' ? 'Читать книгу' : lang === 'uz' ? 'Kitob o\'qish' : 'Read Book', icon: '📖' },
+                  { title: lang === 'ru' ? 'Бег 3 км' : lang === 'uz' ? 'Yugurish 3km' : 'Run 3km', icon: '👟' },
+                ].map((insp) => (
+                  <button
+                    key={insp.title}
+                    type="button"
+                    onClick={() => {
+                      triggerHaptic('selection');
+                      setTitle(insp.title);
+                    }}
+                    className="px-3 py-1.5 rounded-full bg-[#f4f1eb] hover:bg-[#ede8df] text-sanctuary-dark border border-sanctuary-border transition flex items-center gap-1.5 whitespace-nowrap btn-press"
+                  >
+                    <span>{insp.icon}</span> {insp.title}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Time & Interval Card */}
+        <div className="sanctuary-card p-5 space-y-3.5 border-2 border-sanctuary-border">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-sanctuary-green stroke-[2.5]" />
+              <h4 className="text-sm font-black text-sanctuary-dark tracking-tight">{t.reminderLabel}</h4>
+            </div>
+
+            {/* Range toggle */}
+            <div className="flex items-center bg-[#f4f1eb] p-1 rounded-full text-xs font-black border border-sanctuary-border">
+              <button
+                type="button"
+                onClick={() => setIsTimeRange(false)}
+                className={`px-3 py-1 rounded-full transition ${
+                  !isTimeRange ? 'bg-sanctuary-green text-white shadow-xs' : 'text-sanctuary-muted'
+                }`}
+              >
+                Точное
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsTimeRange(true)}
+                className={`px-3 py-1 rounded-full transition ${
+                  isTimeRange ? 'bg-sanctuary-green text-white shadow-xs' : 'text-sanctuary-muted'
+                }`}
+              >
+                Интервал
+              </button>
             </div>
           </div>
+
+          {/* Time pickers */}
+          {isTimeRange ? (
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-[#f4f1eb] rounded-2xl p-3 border border-sanctuary-border">
+                <span className="text-[11px] font-black text-sanctuary-muted block mb-1 uppercase tracking-wider">{t.timeFrom}</span>
+                <input
+                  type="time"
+                  value={timeFrom}
+                  onChange={(e) => setTimeFrom(e.target.value)}
+                  className="w-full bg-white border border-sanctuary-border rounded-xl px-3 py-2 text-base font-black font-mono text-sanctuary-dark outline-none text-center cursor-pointer shadow-2xs"
+                />
+              </div>
+              <div className="bg-[#f4f1eb] rounded-2xl p-3 border border-sanctuary-border">
+                <span className="text-[11px] font-black text-sanctuary-muted block mb-1 uppercase tracking-wider">{t.timeTo}</span>
+                <input
+                  type="time"
+                  value={timeTo}
+                  onChange={(e) => setTimeTo(e.target.value)}
+                  className="w-full bg-white border border-sanctuary-border rounded-xl px-3 py-2 text-base font-black font-mono text-sanctuary-dark outline-none text-center cursor-pointer shadow-2xs"
+                />
+              </div>
+            </div>
+          ) : (
+            <div className="bg-[#f4f1eb] rounded-2xl p-3.5 border border-sanctuary-border flex items-center justify-between">
+              <span className="text-xs font-black text-sanctuary-dark">Время начала</span>
+              <input
+                type="time"
+                value={timeFrom}
+                onChange={(e) => setTimeFrom(e.target.value)}
+                className="bg-white border border-sanctuary-border rounded-xl px-4 py-2 text-base font-black font-mono text-sanctuary-dark outline-none cursor-pointer shadow-2xs"
+              />
+            </div>
+          )}
         </div>
 
         {/* Aesthetic & Symbol */}
@@ -180,7 +299,6 @@ export const AddHabitModal: React.FC<AddHabitModalProps> = ({
             <p className="text-[11px] font-semibold text-sanctuary-muted">{t.aestheticSubtitle}</p>
           </div>
 
-          {/* Icon Selection */}
           <div className="flex items-center justify-between gap-1.5">
             {ICONS.map((item) => (
               <button
@@ -201,7 +319,6 @@ export const AddHabitModal: React.FC<AddHabitModalProps> = ({
             ))}
           </div>
 
-          {/* Color Selection */}
           <div className="flex items-center gap-3.5 pt-1">
             {COLORS.map((c) => (
               <button
@@ -241,45 +358,6 @@ export const AddHabitModal: React.FC<AddHabitModalProps> = ({
               >
                 {cat}
               </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Cadence & Cycle */}
-        <div className="sanctuary-card p-5 space-y-3 border-2 border-sanctuary-border">
-          <div className="flex items-center justify-between">
-            <h4 className="text-sm font-black text-sanctuary-dark tracking-tight">{t.cadenceLabel}</h4>
-            <div className="flex items-center bg-[#f4f1eb] p-1 rounded-full text-xs font-black">
-              <button
-                type="button"
-                onClick={() => setCadence('everyday')}
-                className={`px-3 py-1 rounded-full transition ${
-                  cadence === 'everyday' ? 'bg-sanctuary-green text-white shadow-xs' : 'text-sanctuary-muted'
-                }`}
-              >
-                {t.everyday}
-              </button>
-              <button
-                type="button"
-                onClick={() => setCadence('weekdays')}
-                className={`px-3 py-1 rounded-full transition ${
-                  cadence === 'weekdays' ? 'bg-sanctuary-green text-white shadow-xs' : 'text-sanctuary-muted'
-                }`}
-              >
-                {t.weekdays}
-              </button>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-7 gap-1.5">
-            {t.weekDays.map((d, i) => (
-              <div
-                key={i}
-                className="w-full py-2.5 rounded-xl bg-sanctuary-green text-white text-center flex flex-col items-center justify-center text-[10px] font-black shadow-xs"
-              >
-                <span>{d}</span>
-                <Check className="w-3 h-3 stroke-[3.5] mt-0.5" />
-              </div>
             ))}
           </div>
         </div>
@@ -328,51 +406,28 @@ export const AddHabitModal: React.FC<AddHabitModalProps> = ({
           </div>
         </div>
 
-        {/* Reminder */}
-        <div className="sanctuary-card p-5 space-y-3 border-2 border-sanctuary-border">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-sanctuary-green stroke-[2.5]" />
-              <h4 className="text-sm font-black text-sanctuary-dark tracking-tight">{t.reminderLabel}</h4>
-            </div>
+        {/* Save & Delete Action Buttons */}
+        <div className="space-y-2 pt-2">
+          <button
+            type="button"
+            onClick={handleSave}
+            className="w-full py-4 rounded-2xl bg-sanctuary-green hover:bg-sanctuary-greenHover text-white font-black text-sm shadow-float-green transition btn-press flex items-center justify-center gap-2"
+          >
+            <span>✍️</span>
+            <span>{habitToEdit ? t.saveChangesBtn : t.createHabitBtn}</span>
+          </button>
+
+          {habitToEdit && onDelete && (
             <button
               type="button"
-              onClick={() => {
-                triggerHaptic('impact', 'light');
-                setReminderEnabled(!reminderEnabled);
-              }}
-              className={`w-12 h-6 rounded-full p-0.5 transition-colors btn-press ${
-                reminderEnabled ? 'bg-sanctuary-green' : 'bg-gray-200'
-              }`}
+              onClick={handleDelete}
+              className="w-full py-3.5 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-black text-xs border-2 border-rose-200 transition btn-press flex items-center justify-center gap-2"
             >
-              <div
-                className={`w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform ${
-                  reminderEnabled ? 'translate-x-6' : 'translate-x-0'
-                }`}
-              />
+              <Trash2 className="w-4 h-4 stroke-[2.5]" />
+              <span>{t.deleteHabitBtn}</span>
             </button>
-          </div>
-
-          <div className="flex items-center justify-between bg-[#f4f1eb] rounded-xl p-2.5 px-4 border border-sanctuary-border">
-            <span className="text-xs font-black text-sanctuary-dark">Время сигнала</span>
-            <input
-              type="time"
-              value={reminderTime}
-              onChange={(e) => setReminderTime(e.target.value)}
-              className="bg-white border border-sanctuary-border rounded-lg px-2.5 py-1 text-xs font-black font-mono text-sanctuary-dark outline-none cursor-pointer"
-            />
-          </div>
+          )}
         </div>
-
-        {/* Create Habit Button */}
-        <button
-          type="button"
-          onClick={handleSave}
-          className="w-full py-4 rounded-2xl bg-sanctuary-green hover:bg-sanctuary-greenHover text-white font-black text-sm shadow-float-green transition btn-press flex items-center justify-center gap-2"
-        >
-          <span>✍️</span>
-          <span>{t.createHabitBtn}</span>
-        </button>
       </div>
     </div>
   );

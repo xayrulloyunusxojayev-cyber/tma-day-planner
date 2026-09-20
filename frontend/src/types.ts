@@ -14,14 +14,14 @@ export interface Habit {
   targetValue?: number; // e.g. 5000
   currentValue?: number; // e.g. 3800
   unit?: string; // 'steps' | 'ml' | 'pages' | 'min'
-  alarmTime?: string; // "07:00 AM"
+  alarmTime?: string; // "07:30 - 09:00" or "07:00"
   alarmSound?: string; // "Tibetan Bowl"
   alarmEnabled?: boolean;
 }
 
 export interface DayOfWeekStatus {
-  day: string; // 'M', 'T', 'W', etc.
-  date: number; // 21, 22, ...
+  day: string;
+  date: number;
   isCompleted: boolean;
   isToday: boolean;
 }

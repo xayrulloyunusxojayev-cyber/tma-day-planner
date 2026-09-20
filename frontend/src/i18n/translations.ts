@@ -39,8 +39,9 @@ export interface Translations {
   testSoundBtn: string;
   addAlarmBtn: string;
 
-  // Add Habit Modal
+  // Add & Edit Habit Modal
   newRitualTitle: string;
+  editRitualTitle: string;
   habitNamePlaceholder: string;
   habitTitleLabel: string;
   inspirationsLabel: string;
@@ -54,7 +55,13 @@ export interface Translations {
   targetGoalLabel: string;
   unitLabel: string;
   reminderLabel: string;
+  timeRangeLabel: string;
+  timeFrom: string;
+  timeTo: string;
   createHabitBtn: string;
+  saveChangesBtn: string;
+  deleteHabitBtn: string;
+  deleteConfirm: string;
   cancelBtn: string;
   saveBtn: string;
 
@@ -115,6 +122,7 @@ export const translations: Record<Language, Translations> = {
     addAlarmBtn: 'Добавить напоминание',
 
     newRitualTitle: 'Новый ритуал',
+    editRitualTitle: 'Редактировать ритуал',
     habitNamePlaceholder: 'Название ритуала',
     habitTitleLabel: 'Название привычки',
     inspirationsLabel: 'Быстрый выбор',
@@ -127,8 +135,14 @@ export const translations: Record<Language, Translations> = {
     weekdays: 'Будни',
     targetGoalLabel: 'Целевое значение',
     unitLabel: 'Единица измерения',
-    reminderLabel: 'Напоминание',
+    reminderLabel: 'Время выполнения / интервал',
+    timeRangeLabel: 'Интервал времени',
+    timeFrom: 'С',
+    timeTo: 'До',
     createHabitBtn: 'Создать привычку',
+    saveChangesBtn: 'Сохранить изменения',
+    deleteHabitBtn: 'Удалить привычку',
+    deleteConfirm: 'Вы уверены, что хотите удалить эту привычку?',
     cancelBtn: 'Отмена',
     saveBtn: 'Сохранить',
 
@@ -186,6 +200,7 @@ export const translations: Record<Language, Translations> = {
     addAlarmBtn: 'Add Reminder',
 
     newRitualTitle: 'New Ritual',
+    editRitualTitle: 'Edit Ritual',
     habitNamePlaceholder: 'Ritual Name',
     habitTitleLabel: 'Habit Title',
     inspirationsLabel: 'Inspirations',
@@ -198,8 +213,14 @@ export const translations: Record<Language, Translations> = {
     weekdays: 'Weekdays',
     targetGoalLabel: 'Target Goal',
     unitLabel: 'Unit Metric',
-    reminderLabel: 'Reminder',
+    reminderLabel: 'Execution time / interval',
+    timeRangeLabel: 'Time Range',
+    timeFrom: 'From',
+    timeTo: 'To',
     createHabitBtn: 'Create Habit',
+    saveChangesBtn: 'Save Changes',
+    deleteHabitBtn: 'Delete Habit',
+    deleteConfirm: 'Are you sure you want to delete this habit?',
     cancelBtn: 'Cancel',
     saveBtn: 'Save',
 
@@ -257,6 +278,7 @@ export const translations: Record<Language, Translations> = {
     addAlarmBtn: 'Eslatma qo\'shish',
 
     newRitualTitle: 'Yangi odat',
+    editRitualTitle: 'Odatni tahrirlash',
     habitNamePlaceholder: 'Odat nomi',
     habitTitleLabel: 'Odat nomi',
     inspirationsLabel: 'Tezkor tanlov',
@@ -269,8 +291,14 @@ export const translations: Record<Language, Translations> = {
     weekdays: 'Ish kunlari',
     targetGoalLabel: 'Maqsad miqdori',
     unitLabel: 'O\'lchov birligi',
-    reminderLabel: 'Eslatma',
+    reminderLabel: 'Bajarish vaqti / oralig\'i',
+    timeRangeLabel: 'Vaqt oralig\'i',
+    timeFrom: 'Dan',
+    timeTo: 'Gacha',
     createHabitBtn: 'Odatni yaratish',
+    saveChangesBtn: 'O\'zgarishlarni saqlash',
+    deleteHabitBtn: 'Odatni o\'chirish',
+    deleteConfirm: 'Haqiqatan ham bu odatni o\'chirmoqchimisiz?',
     cancelBtn: 'Bekor qilish',
     saveBtn: 'Saqlash',
 
