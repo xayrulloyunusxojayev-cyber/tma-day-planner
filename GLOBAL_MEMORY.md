@@ -15,18 +15,42 @@
 - **Связка:** Развернуто на Render.com через Dockerfile. Uvicorn отдает API, статику фронтенда и запускает бота aiogram 3.
 
 
-## 3. Ключевой функционал (Notion Table View)
-- **Точная копия Notion Database UI:**
-  - Чистый минималистичный светлый интерфейс Notion (шрифты, линии `#e9e9e8`, отступы).
-  - Вкладки видов: `📋 All Tasks`, `🔄 By Status`, `👤 My Tasks`, `📅 Today`.
-  - Полноценная таблица:
-    - `Aa Task name`: название задачи с зеленой галочкой, инлайн-редактирование по клику.
-    - `≡ Text / Time`: временной интервал (`8.00-13.00`, `15.00-18.00`, `24/7`) с инлайн-редактированием.
-    - `💰 Earnings`: сумма заработка от задачи с автоматическим расчетом общей суммы (Sum) внизу таблицы.
-    - `👥 Assignee`: аватарка + имя (Hayrullo).
-    - `📅 Due date`: дата задачи.
-    - `☼ Status`: аутентичные Notion-пилюли (`In progress` синий, `Done` зеленый, `Not started` серый) с переключением в 1 клик.
-    - `☑️ Checkbox`: квадратный чекбокс.
-  - Строка `+ New task` внизу таблицы — добавление строки в 1 клик.
-  - Будильник в шапке Notion: аккуратная кнопка с настройкой времени подъема и дней недели.
+## 3. Архитектура экранов (Daily Sanctuary — 5 экранов пиксель-в-пиксель)
+1. **Экран 1: Home (Daily Sanctuary)**
+   - Приветствие `Good morning, Sophia` + цветок, дата, цитата дня `Small mindful steps cultivate enduring peace.`
+   - Карточка `Harmony in Motion`: 14-Day Streak, 4/5 rituals completed, кольцевой SVG-прогресс 80%, стрелка баланса.
+   - Недельный календарь `This Week` | `Perfect Pace` с чекмарками и песочными часами.
+   - Фильтры по времени суток: `All (5)`, `Morning (3)`, `Afternoon (1)`, `Evening (2)`.
+   - Список привычек `Today's Habits` с отметкой выполнения (Haptics), счетчиком `+ 500 steps` и прогресс-баром.
+   - Карточка мудрости `Mindful Reflection: Rest is a conscious choice`.
+
+2. **Экран 2: Calendar & Analytics (Consistency Analytics)**
+   - Метрики: `Current Streak` (28 Days), `Consistency` (92%), `Completed` (184 habits), `Best Month` (October).
+   - Календарь на месяц с точками активности (100% Perfect, Partial, Rest).
+   - Список ритуалов дня с кнопкой `Mark Done`.
+   - Награды `Milestone Badges`: `Consistency Club (Gold)`, `30-Day Zen Master (28/30)`.
+   - `Habit Tip of the Day`.
+
+3. **Экран 3: Alarm & Routines**
+   - Баннер ближайшего ритуала: `Evening Nature Walk (In 42 min)`.
+   - Переключатели: `Smart Alarms` и `Gentle Chimes` (с прослушиванием звука через Web Audio).
+   - Группы будильников: `Morning Routines`, `Afternoon Focus`, `Evening Wind-Down` с тумблерами.
+   - `Persistent Alarm Mode: Ring until habit is marked complete`.
+   - Кнопка `Set New Reminder`.
+
+4. **Экран 4: Add Habit (Модальное окно)**
+   - Создание нового ритуала: `Habit Title`, быстрые идеи `Inspirations`.
+   - `Aesthetic & Symbol`: выбор иконки и цвета палитры.
+   - `Category Realm`: Mindfulness, Fitness, Productivity, Health, Sleep.
+   - `Cadence & Cycle`: Every day / Weekdays + дни недели.
+   - `Target Goal`: счетчик `— 15 +` с выбором единиц (ml, steps, pages, min).
+   - `Reminder`: время напоминания и тумблер.
+   - Кнопка `Create Habit`.
+
+5. **Экран 5: Settings & Profile**
+   - Карточка `Sophia Laurent` (Habit Pro Member ✨, 14 Days Streak, 84% Score).
+   - `Habit Flow & Feedback`: First Day of Week, Sound Effects, Haptic Feedback, Vacation Mode.
+   - `Appearance & Atmosphere`: темы Organic Sage, Oat Minimal, Nordic Dusk, Dark Mode.
+   - `Integrations & Community`: Apple Health, Cloud Backup, Export Data, Streak Guide, Rate App.
+
 

@@ -1,20 +1,35 @@
-export type TaskStatus = 'Not started' | 'In progress' | 'Done';
+export type HabitCategory = 'Mindfulness' | 'Fitness' | 'Productivity' | 'Health' | 'Sleep';
+export type TimeOfDay = 'Morning' | 'Afternoon' | 'Evening';
 
-export interface NotionTask {
+export interface Habit {
   id: string;
-  name: string;
-  time: string; // e.g. "8.00-13.00", "15.00-18.00", "24/7"
-  status: TaskStatus;
-  due_date: string; // e.g. "08/27/2026"
-  is_completed: boolean;
-  revenue: number; // earnings from this task
-  category?: string;
+  title: string;
+  category: HabitCategory;
+  timeOfDay: TimeOfDay;
+  subtitle: string; // e.g. "1,000ml water • Wellness"
+  streak: number; // e.g. 14
+  isCompleted: boolean;
+  icon: string; // 'drop' | 'meditate' | 'book' | 'walk' | 'moon' | 'heart' | 'plant'
+  color: string; // 'sage' | 'terracotta' | 'gold' | 'olive' | 'sand'
+  targetValue?: number; // e.g. 5000
+  currentValue?: number; // e.g. 3800
+  unit?: string; // 'steps' | 'ml' | 'pages' | 'min'
+  alarmTime?: string; // "07:00 AM"
+  alarmSound?: string; // "Tibetan Bowl"
+  alarmEnabled?: boolean;
 }
 
-export interface AlarmSettings {
-  user_id: number;
-  wake_time: string; // "05:30"
-  is_active: boolean;
-  days: number[];
-  sound_type: 'apex' | 'gentle';
+export interface DayOfWeekStatus {
+  day: string; // 'M', 'T', 'W', etc.
+  date: number; // 21, 22, ...
+  isCompleted: boolean;
+  isToday: boolean;
+}
+
+export interface SanctuaryUser {
+  name: string;
+  avatarUrl?: string;
+  activeStreak: number;
+  overallScore: number;
+  isPro: boolean;
 }

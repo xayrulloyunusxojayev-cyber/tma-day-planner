@@ -1,145 +1,220 @@
 import React, { useState, useEffect } from 'react';
-import { NotionTableView } from './components/NotionTableView';
-import { NotionAlarmModal } from './components/NotionAlarmModal';
-import { NotionTask, AlarmSettings } from './types';
+import { TopHeader } from './components/TopHeader';
+import { BottomNavBar, TabType } from './components/BottomNavBar';
+import { HomeScreen } from './components/HomeScreen';
+import { CalendarScreen } from './components/CalendarScreen';
+import { AlarmScreen } from './components/AlarmScreen';
+import { SettingsScreen } from './components/SettingsScreen';
+import { AddHabitModal } from './components/AddHabitModal';
+import { Habit } from './types';
 import { initTelegram, getTelegramUser, triggerHaptic } from './telegram';
-import { alarmAudio } from './audio';
 
-const INITIAL_NOTION_TASKS: NotionTask[] = [
+const INITIAL_HABITS: Habit[] = [
   {
     id: '1',
-    name: 'Read Namaz at the Time',
-    time: '24/7',
-    status: 'In progress',
-    due_date: '08/27/2026',
-    is_completed: false,
-    revenue: 0,
+    title: 'Morning Hydration',
+    category: 'Health',
+    timeOfDay: 'Morning',
+    subtitle: '1,000ml water • Wellness',
+    streak: 14,
+    isCompleted: true,
+    icon: 'drop',
+    color: 'sage',
+    alarmTime: '07:00 AM',
+    alarmSound: 'Tibetan Bowl',
+    alarmEnabled: true,
   },
   {
     id: '2',
-    name: 'School',
-    time: '8.00-13.00',
-    status: 'Done',
-    due_date: '08/27/2026',
-    is_completed: true,
-    revenue: 0,
+    title: 'Mindful Meditation',
+    category: 'Mindfulness',
+    timeOfDay: 'Morning',
+    subtitle: '15 minutes • Mind',
+    streak: 9,
+    isCompleted: true,
+    icon: 'meditate',
+    color: 'terracotta',
+    alarmTime: '07:45 AM',
+    alarmSound: 'Forest Birds',
+    alarmEnabled: true,
   },
   {
     id: '3',
-    name: 'Koran',
-    time: '13.00-15.00',
-    status: 'Done',
-    due_date: '08/27/2026',
-    is_completed: true,
-    revenue: 0,
+    title: 'Deep Reading',
+    category: 'Productivity',
+    timeOfDay: 'Morning',
+    subtitle: '20 pages read • Growth',
+    streak: 21,
+    isCompleted: true,
+    icon: 'book',
+    color: 'gold',
+    alarmTime: '12:30 PM',
+    alarmSound: 'Soft Bell',
+    alarmEnabled: true,
   },
   {
     id: '4',
-    name: 'Antigravity (Заработок & Разработка)',
-    time: '15.00-18.00',
-    status: 'In progress',
-    due_date: '08/27/2026',
-    is_completed: false,
-    revenue: 250,
+    title: 'Evening Nature Walk',
+    category: 'Fitness',
+    timeOfDay: 'Evening',
+    subtitle: 'Target: 5,000 steps • Body',
+    streak: 0,
+    isCompleted: false,
+    icon: 'walk',
+    color: 'olive',
+    targetValue: 5000,
+    currentValue: 3800,
+    unit: 'steps',
+    alarmTime: '06:00 PM',
+    alarmSound: 'Soft Bell',
+    alarmEnabled: true,
   },
   {
     id: '5',
-    name: 'Koran',
-    time: '18.15-19.00',
-    status: 'Not started',
-    due_date: '08/27/2026',
-    is_completed: false,
-    revenue: 0,
-  },
-  {
-    id: '6',
-    name: 'Sleep',
-    time: '20.20-5.30',
-    status: 'Not started',
-    due_date: '08/27/2026',
-    is_completed: false,
-    revenue: 0,
+    title: 'Digital Wind-Down',
+    category: 'Sleep',
+    timeOfDay: 'Evening',
+    subtitle: 'By 10:00 PM • Rest & Sleep',
+    streak: 0,
+    isCompleted: false,
+    icon: 'moon',
+    color: 'sand',
+    alarmTime: '10:00 PM',
+    alarmSound: 'Muted',
+    alarmEnabled: false,
   },
 ];
 
-const DEFAULT_ALARM: AlarmSettings = {
-  user_id: 123456789,
-  wake_time: '05:30',
-  is_active: true,
-  days: [0, 1, 2, 3, 4, 5, 6],
-  sound_type: 'gentle',
-};
-
 export function App() {
   const user = getTelegramUser();
-
-  const [tasks, setTasks] = useState<NotionTask[]>(() => {
-    const saved = localStorage.getItem('notion_tasks_v2');
-    return saved ? JSON.parse(saved) : INITIAL_NOTION_TASKS;
+  const [currentTab, setCurrentTab] = useState<TabType>('home');
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [habits, setHabits] = useState<Habit[]>(() => {
+    const saved = localStorage.getItem('sanctuary_habits');
+    return saved ? JSON.parse(saved) : INITIAL_HABITS;
   });
-
-  const [alarm, setAlarm] = useState<AlarmSettings>(() => {
-    const saved = localStorage.getItem('notion_alarm_v2');
-    return saved ? JSON.parse(saved) : { ...DEFAULT_ALARM, user_id: user.id };
-  });
-
-  const [isAlarmModalOpen, setIsAlarmModalOpen] = useState(false);
 
   useEffect(() => {
     initTelegram();
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('notion_tasks_v2', JSON.stringify(tasks));
-  }, [tasks]);
+    localStorage.setItem('sanctuary_habits', JSON.stringify(habits));
+  }, [habits]);
 
-  useEffect(() => {
-    localStorage.setItem('notion_alarm_v2', JSON.stringify(alarm));
-    fetch('/api/alarm', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(alarm),
-    }).catch(() => {});
-  }, [alarm]);
-
-  const handleUpdateTask = (updatedTask: NotionTask) => {
-    setTasks((prev) => prev.map((t) => (t.id === updatedTask.id ? updatedTask : t)));
+  const handleToggleHabit = (id: string) => {
+    setHabits((prev) =>
+      prev.map((h) => {
+        if (h.id === id) {
+          const next = !h.isCompleted;
+          return {
+            ...h,
+            isCompleted: next,
+            streak: next ? (h.streak || 0) + 1 : Math.max(0, (h.streak || 1) - 1),
+            currentValue: next && h.targetValue ? h.targetValue : h.currentValue,
+          };
+        }
+        return h;
+      })
+    );
   };
 
-  const handleAddTask = (newTaskData: Partial<NotionTask>) => {
-    const newTask: NotionTask = {
+  const handleIncrementSteps = (id: string) => {
+    setHabits((prev) =>
+      prev.map((h) => {
+        if (h.id === id && h.currentValue !== undefined && h.targetValue) {
+          const nextVal = Math.min(h.targetValue, h.currentValue + 500);
+          return {
+            ...h,
+            currentValue: nextVal,
+            isCompleted: nextVal >= h.targetValue,
+          };
+        }
+        return h;
+      })
+    );
+  };
+
+  const handleSaveHabit = (newHabitData: Partial<Habit>) => {
+    const newHabit: Habit = {
       id: Date.now().toString(),
-      name: newTaskData.name || 'Новая задача',
-      time: newTaskData.time || '10.00-12.00',
-      status: newTaskData.status || 'Not started',
-      due_date: newTaskData.due_date || '08/27/2026',
-      is_completed: false,
-      revenue: newTaskData.revenue || 0,
+      title: newHabitData.title || 'New Ritual',
+      category: newHabitData.category || 'Mindfulness',
+      timeOfDay: newHabitData.timeOfDay || 'Morning',
+      subtitle: newHabitData.subtitle || 'Wellness',
+      streak: 1,
+      isCompleted: false,
+      icon: newHabitData.icon || 'drop',
+      color: newHabitData.color || 'sage',
+      targetValue: newHabitData.targetValue,
+      currentValue: 0,
+      unit: newHabitData.unit || 'times',
+      alarmTime: newHabitData.alarmTime || '07:00 AM',
+      alarmEnabled: true,
     };
-    setTasks((prev) => [...prev, newTask]);
+    setHabits((prev) => [newHabit, ...prev]);
   };
 
-  const handleDeleteTask = (taskId: string) => {
-    setTasks((prev) => prev.filter((t) => t.id !== taskId));
+  const getHeaderSubtitle = () => {
+    switch (currentTab) {
+      case 'home':
+        return 'Home';
+      case 'calendar':
+        return 'Calendar';
+      case 'alarm':
+        return 'Alarm';
+      case 'settings':
+        return 'Settings';
+    }
   };
 
   return (
-    <div className="min-h-screen bg-white text-notion-text selection:bg-blue-100 selection:text-blue-900">
-      <NotionTableView
-        tasks={tasks}
-        onUpdateTask={handleUpdateTask}
-        onAddTask={handleAddTask}
-        onDeleteTask={handleDeleteTask}
-        onOpenAlarm={() => setIsAlarmModalOpen(true)}
-        alarmTime={alarm.wake_time}
-        isAlarmActive={alarm.is_active}
+    <div className="min-h-screen bg-[#fbf9f5] text-sanctuary-dark max-w-md mx-auto shadow-2xl relative flex flex-col justify-between">
+      {/* Top Header */}
+      <TopHeader
+        subtitle={getHeaderSubtitle()}
+        userName={user.first_name || 'Sophia'}
       />
 
-      <NotionAlarmModal
-        isOpen={isAlarmModalOpen}
-        onClose={() => setIsAlarmModalOpen(false)}
-        alarm={alarm}
-        onSaveAlarm={(newAlarm) => setAlarm(newAlarm)}
+      {/* Main Screen Content */}
+      <main className="flex-1 overflow-y-auto">
+        {currentTab === 'home' && (
+          <HomeScreen
+            habits={habits}
+            onToggleHabit={handleToggleHabit}
+            onIncrementSteps={handleIncrementSteps}
+            userName={user.first_name || 'Sophia'}
+          />
+        )}
+
+        {currentTab === 'calendar' && (
+          <CalendarScreen
+            habits={habits}
+            onToggleHabit={handleToggleHabit}
+          />
+        )}
+
+        {currentTab === 'alarm' && (
+          <AlarmScreen
+            onOpenAddHabit={() => setIsAddModalOpen(true)}
+          />
+        )}
+
+        {currentTab === 'settings' && <SettingsScreen />}
+      </main>
+
+      {/* Persistent Bottom Navigation */}
+      <BottomNavBar
+        currentTab={currentTab}
+        onTabChange={setCurrentTab}
+        onOpenAddModal={() => setIsAddModalOpen(true)}
+      />
+
+      {/* Add Habit Modal (Screen 4) */}
+      <AddHabitModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSave={handleSaveHabit}
       />
     </div>
   );

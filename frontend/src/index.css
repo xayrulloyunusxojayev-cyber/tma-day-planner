@@ -4,38 +4,29 @@
 
 @layer base {
   body {
-    background-color: #ffffff;
-    color: #37352f;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #fbf9f5;
+    color: #1e2420;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
     -webkit-tap-highlight-color: transparent;
   }
 }
 
-/* Notion subtle scrollbar */
+/* Smooth scrolling and minimalist scrollbar */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 4px;
+  height: 4px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #d4d4d2;
+  background: #edeae3;
   border-radius: 9999px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #b5b4b1;
-}
 
-.notion-cell {
-  border-bottom: 1px solid #e9e9e8;
-  border-right: 1px solid #e9e9e8;
-}
-
-.notion-header-cell {
-  border-bottom: 1px solid #e9e9e8;
-  border-right: 1px solid #e9e9e8;
-  color: #787774;
-  font-size: 13px;
-  font-weight: 500;
+.sanctuary-card {
+  background-color: #ffffff;
+  border-radius: 1.5rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(237, 234, 227, 0.6);
 }
