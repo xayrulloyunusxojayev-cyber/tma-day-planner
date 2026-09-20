@@ -41,11 +41,11 @@ export const getTelegramUser = (): TelegramUser => {
   if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
     return tg.initDataUnsafe.user;
   }
-  // Fallback for local development in browser
+  // Fallback for local development or external browser
   return {
-    id: 123456789,
-    first_name: 'Alpha Founder',
-    username: 'founder_ceo',
+    id: 8856548740,
+    first_name: 'Hayrullo',
+    username: 'Hayrullo_Yunusov',
   };
 };
 
