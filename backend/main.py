@@ -9,7 +9,8 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from typing import List, Optional
 
-from config import PORT, HOST, BOT_TOKEN
+from config import PORT, HOST, BOT_TOKEN, WEBAPP_URL
+from aiogram.types import Update
 from database import (
     init_db,
     get_user_day_data,
@@ -68,8 +69,6 @@ class SyncAlarmsModel(BaseModel):
     alarms: List[HabitAlarmItem]
     source: str = "all"
 
-bot_task = None
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
@@ -79,25 +78,30 @@ async def lifespan(app: FastAPI):
     logger.info("Starting Scheduler...")
     start_scheduler()
 
-    logger.info("Starting Telegram Bot Polling...")
-    global bot_task
+    webhook_url = f"{WEBAPP_URL.rstrip('/')}/webhook"
+    logger.info(f"Setting Telegram Webhook to: {webhook_url}")
     try:
-        await bot.delete_webhook(drop_pending_updates=True)
+        await bot.set_webhook(
+            url=webhook_url,
+            drop_pending_updates=True,
+            allowed_updates=dp.resolve_used_update_types()
+        )
+        logger.info("Telegram Webhook set successfully!")
     except Exception as e:
-        logger.warning(f"Could not delete webhook: {e}")
-    # Give previous container 2 seconds to release getUpdates during zero-downtime deploys
-    await asyncio.sleep(2)
-    bot_task = asyncio.create_task(dp.start_polling(bot, handle_signals=False))
+        logger.error(f"Failed to set webhook: {e}")
 
     yield
 
     # Shutdown
-    if bot_task:
-        bot_task.cancel()
+    logger.info("Deleting Telegram Webhook...")
+    try:
+        await bot.delete_webhook()
+    except Exception as e:
+        logger.warning(f"Could not delete webhook: {e}")
     await bot.session.close()
     logger.info("Shutdown complete.")
 
-app = FastAPI(title="Apex Day Planner API", lifespan=lifespan)
+app = FastAPI(title="Hairu Day Planner API", lifespan=lifespan)
 
 # CORS
 app.add_middleware(
@@ -119,6 +123,16 @@ async def head_root():
 @app.head("/ping")
 async def health_check():
     return {"status": "ok", "app": "Hairu", "uptime": "healthy"}
+
+# Telegram Webhook Endpoint
+@app.post("/webhook")
+async def telegram_webhook(update: dict):
+    try:
+        telegram_update = Update(**update)
+        await dp.feed_update(bot, telegram_update)
+    except Exception as e:
+        logger.error(f"Error processing webhook update: {e}")
+    return {"status": "ok"}
 
 # API Routes
 @app.get("/api/data")
@@ -176,4 +190,5 @@ async def custom_404_handler(request, exc):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host=HOST, port=PORT, reload=True)
+    is_dev = os.getenv("ENV") == "development"
+    uvicorn.run("main:app", host=HOST, port=PORT, reload=is_dev)
