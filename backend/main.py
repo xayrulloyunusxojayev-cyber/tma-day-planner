@@ -18,6 +18,7 @@ from database import (
     delete_task_db,
     save_alarm_db,
     save_target_db,
+    sync_user_alarms_db,
 )
 from bot import bot, dp
 from scheduler import start_scheduler
@@ -54,6 +55,17 @@ class TargetModel(BaseModel):
     date: str
     target_amount: float
     currency: str = "USD"
+
+class HabitAlarmItem(BaseModel):
+    habit_id: str
+    title: str
+    time_str: str
+    is_active: bool = True
+
+class SyncAlarmsModel(BaseModel):
+    user_id: int
+    timezone: str = "Asia/Tashkent"
+    alarms: List[HabitAlarmItem]
 
 bot_task = None
 
@@ -119,6 +131,16 @@ async def api_save_alarm(alarm: AlarmModel):
 async def api_save_target(target: TargetModel):
     await save_target_db(target.model_dump())
     return {"status": "ok", "target": target}
+
+@app.post("/api/alarms/sync")
+async def api_sync_alarms(data: SyncAlarmsModel):
+    await sync_user_alarms_db(
+        data.user_id,
+        data.timezone,
+        [a.model_dump() for a in data.alarms]
+    )
+    return {"status": "ok", "count": len(data.alarms)}
+
 
 # Static files for Vite React build
 static_dir = os.path.join(os.path.dirname(__file__), "static")

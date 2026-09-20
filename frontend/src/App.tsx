@@ -112,7 +112,36 @@ export function App() {
 
   useEffect(() => {
     localStorage.setItem('sanctuary_habits_v4', JSON.stringify(habits));
-  }, [habits]);
+
+    // Sync habit alarms with backend for Telegram Bot Push notifications
+    const syncAlarmsWithBackend = async () => {
+      try {
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Asia/Tashkent';
+        const activeAlarms = habits
+          .filter((h) => h.alarmTime && (h.alarmEnabled ?? true))
+          .map((h) => ({
+            habit_id: h.id,
+            title: h.title,
+            time_str: h.alarmTime!,
+            is_active: h.alarmEnabled ?? true,
+          }));
+
+        await fetch('/api/alarms/sync', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            user_id: user.id,
+            timezone: tz,
+            alarms: activeAlarms,
+          }),
+        });
+      } catch (err) {
+        console.warn('Failed to sync alarms with backend:', err);
+      }
+    };
+
+    syncAlarmsWithBackend();
+  }, [habits, user.id]);
 
   const handleLanguageChange = (newLang: Language) => {
     setLang(newLang);

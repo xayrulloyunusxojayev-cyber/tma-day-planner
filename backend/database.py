@@ -46,6 +46,19 @@ async def init_db():
                 PRIMARY KEY (user_id, date)
             )
         """)
+        await db.execute("""
+            CREATE TABLE IF NOT EXISTS habit_alarms (
+                id TEXT PRIMARY KEY,
+                user_id INTEGER,
+                habit_id TEXT,
+                title TEXT,
+                time_str TEXT,
+                is_active INTEGER DEFAULT 1,
+                timezone TEXT DEFAULT 'Asia/Tashkent',
+                last_triggered_date TEXT DEFAULT '',
+                updated_at TEXT
+            )
+        """)
         await db.commit()
 
 async def upsert_user(user_id: int, username: str, first_name: str):
@@ -217,3 +230,42 @@ async def get_all_active_alarms():
                     "vibrate": bool(r["vibrate"]),
                 })
             return alarms
+
+async def sync_user_alarms_db(user_id: int, timezone: str, alarms: list):
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        now = datetime.now().isoformat()
+        await db.execute("DELETE FROM habit_alarms WHERE user_id = ?", (user_id,))
+        for a in alarms:
+            alarm_id = f"{user_id}_{a['habit_id']}"
+            await db.execute("""
+                INSERT INTO habit_alarms (id, user_id, habit_id, title, time_str, is_active, timezone, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                alarm_id,
+                user_id,
+                a["habit_id"],
+                a["title"],
+                a["time_str"],
+                1 if a.get("is_active", True) else 0,
+                timezone or "Asia/Tashkent",
+                now
+            ))
+        await db.commit()
+
+async def get_all_active_habit_alarms():
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute("SELECT * FROM habit_alarms WHERE is_active = 1") as cursor:
+            rows = await cursor.fetchall()
+            return [dict(r) for r in rows]
+
+async def mark_habit_alarm_triggered(alarm_id: str, date_str: str):
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        await db.execute("UPDATE habit_alarms SET last_triggered_date = ? WHERE id = ?", (date_str, alarm_id))
+        await db.commit()
+
+async def snooze_habit_alarm_db(alarm_id: str, new_time_str: str):
+    async with aiosqlite.connect(DATABASE_PATH) as db:
+        await db.execute("UPDATE habit_alarms SET time_str = ?, last_triggered_date = '' WHERE id = ?", (new_time_str, alarm_id))
+        await db.commit()
+

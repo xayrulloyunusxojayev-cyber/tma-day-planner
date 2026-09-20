@@ -9,8 +9,8 @@ from aiogram.types import (
     MenuButtonWebApp,
 )
 from config import BOT_TOKEN, WEBAPP_URL
-from database import upsert_user, get_user_day_data
-from datetime import datetime
+from database import upsert_user, get_user_day_data, snooze_habit_alarm_db
+from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
 
@@ -133,3 +133,78 @@ async def send_wake_up_alarm(user_id: int, wake_time: str, target_amount: float,
         )
     except Exception as e:
         logger.error(f"Failed to send alarm to user {user_id}: {e}")
+
+async def send_habit_alarm(user_id: int, habit_id: str, alarm_id: str, title: str, time_str: str):
+    """Sends an actionable habit alarm push notification to the user"""
+    kb = InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="🔕 Я проснулся / Выполнил (+500)",
+                    callback_data=f"alarm_done:{habit_id}:{alarm_id}"
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="⏱ Отложить на 10 минут",
+                    callback_data=f"alarm_snooze:{habit_id}:{alarm_id}"
+                )
+            ],
+            [
+                InlineKeyboardButton(
+                    text="⚡️ Открыть Day Planner",
+                    web_app=WebAppInfo(url=WEBAPP_URL)
+                )
+            ]
+        ]
+    )
+    text = (
+        f"⏰🔔 <b>ПОДЪЕМ / ВРЕМЯ ПРИВЫЧКИ!</b>\n\n"
+        f"📌 <b>{title}</b>\n"
+        f"⏱ Время: <b>{time_str}</b>\n\n"
+        f"<i>Подтверди выполнение или отложи звонок:</i>"
+    )
+    try:
+        await bot.send_message(
+            chat_id=user_id,
+            text=text,
+            parse_mode="HTML",
+            reply_markup=kb
+        )
+    except Exception as e:
+        logger.error(f"Failed to send habit alarm to user {user_id}: {e}")
+
+@dp.callback_query(F.data.startswith("alarm_done:"))
+async def on_alarm_done(callback: types.CallbackQuery):
+    parts = callback.data.split(":")
+    habit_id = parts[1] if len(parts) > 1 else ""
+    await callback.answer("Привычка выполнена! +500 баллов! 🎉", show_alert=True)
+    try:
+        await callback.message.edit_text(
+            f"✅ <b>Привычка отмечена как выполненная!</b> (+500 баллов)\n\n"
+            f"Отличная дисциплина! Ты забираешь этот день! 🚀",
+            parse_mode="HTML",
+            reply_markup=get_webapp_keyboard()
+        )
+    except Exception as e:
+        logger.warning(f"Could not edit message: {e}")
+
+@dp.callback_query(F.data.startswith("alarm_snooze:"))
+async def on_alarm_snooze(callback: types.CallbackQuery):
+    parts = callback.data.split(":")
+    alarm_id = parts[2] if len(parts) > 2 else ""
+    now = datetime.now() + timedelta(minutes=10)
+    new_time_str = now.strftime("%H:%M")
+    if alarm_id:
+        await snooze_habit_alarm_db(alarm_id, new_time_str)
+    await callback.answer(f"Отложено на 10 минут (до {new_time_str}) ⏱", show_alert=True)
+    try:
+        await callback.message.edit_text(
+            f"⏱ <b>Напоминание отложено на 10 минут</b> (до {new_time_str}).\n\n"
+            f"Скоро прозвучит повторный сигнал!",
+            parse_mode="HTML",
+            reply_markup=get_webapp_keyboard()
+        )
+    except Exception as e:
+        logger.warning(f"Could not edit message: {e}")
+
