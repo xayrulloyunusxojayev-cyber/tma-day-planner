@@ -81,7 +81,13 @@ async def lifespan(app: FastAPI):
 
     logger.info("Starting Telegram Bot Polling...")
     global bot_task
-    bot_task = asyncio.create_task(dp.start_polling(bot))
+    try:
+        await bot.delete_webhook(drop_pending_updates=True)
+    except Exception as e:
+        logger.warning(f"Could not delete webhook: {e}")
+    # Give previous container 2 seconds to release getUpdates during zero-downtime deploys
+    await asyncio.sleep(2)
+    bot_task = asyncio.create_task(dp.start_polling(bot, handle_signals=False))
 
     yield
 
