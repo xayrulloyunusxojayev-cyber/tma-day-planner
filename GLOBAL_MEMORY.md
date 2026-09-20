@@ -53,4 +53,16 @@
    - `Appearance & Atmosphere`: темы Organic Sage, Oat Minimal, Nordic Dusk, Dark Mode.
    - `Integrations & Community`: Apple Health, Cloud Backup, Export Data, Streak Guide, Rate App.
 
+## 4. Telegram Bot Push Alarm System
+- **Проблема мобильных WebViews:** При закрытом приложении или заблокированном экране iOS и Android замораживают JavaScript и Web Audio, поэтому локальный Web Audio таймер не звенит.
+- **Архитектурное решение:**
+  1. Frontend автоматически определяет часовой пояс (`Intl.DateTimeFormat().resolvedOptions().timeZone`) и синхронизирует активные привычки со временем через `POST /api/alarms/sync`.
+  2. База данных SQLite хранит таблицу `habit_alarms` с привязкой к `user_id`, `time_str`, `timezone` и `last_triggered_date`.
+  3. Планировщик `APScheduler` на бэкенде каждую минуту проверяет будильники с учетом часового пояса пользователя.
+  4. В заданное время бот `@xayrulo_bot` присылает сообщение с вибро/звуком и кнопками:
+     - `[ 🔕 Я проснулся / Выполнил (+500) ]`
+     - `[ ⏱ Отложить на 10 минут ]`
+  5. По нажатию бот обновляет сообщение, начисляет баллы или переносит звонок на 10 минут.
+
+
 
