@@ -57,10 +57,10 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
       {/* Calendar Header & Export */}
       <div className="pt-2 flex items-center justify-between">
         <div>
-          <span className="text-[11px] text-sanctuary-muted font-medium block">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-sanctuary-muted block mb-1">
             Интерактивный календарь
           </span>
-          <h1 className="text-2xl font-bold tracking-tight text-sanctuary-dark">
+          <h1 className="text-3xl font-black tracking-tight text-sanctuary-dark">
             Календарь
           </h1>
         </div>
@@ -68,46 +68,46 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
         {/* Export Button to Real Phone Calendar */}
         <button
           onClick={handleExportToCalendar}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sanctuary-green hover:bg-sanctuary-greenHover text-white text-xs font-semibold shadow-xs transition active:scale-95"
+          className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-sanctuary-green hover:bg-sanctuary-greenHover text-white text-xs font-black shadow-sm btn-press"
           title="Экспортировать в Календарь телефона (iCal / Google / Apple)"
         >
-          <Download className="w-3.5 h-3.5" />
+          <Download className="w-4 h-4 stroke-[2.5]" />
           <span>В календарь</span>
         </button>
       </div>
 
-      {/* Real Month View */}
-      <div className="sanctuary-card p-4 space-y-3">
+      {/* Real Month View (Bold & Clean) */}
+      <div className="sanctuary-card p-5 space-y-4">
         {/* Navigation */}
         <div className="flex items-center justify-between">
-          <h3 className="font-bold text-sm text-sanctuary-dark capitalize">
+          <h3 className="font-black text-base text-sanctuary-dark capitalize tracking-tight">
             {formatMonthYear(year, monthIndex)}
           </h3>
           <div className="flex items-center gap-1">
             <button
               onClick={handlePrevMonth}
-              className="p-1.5 rounded-lg hover:bg-black/5 text-sanctuary-muted transition"
+              className="p-2 rounded-xl hover:bg-black/5 text-sanctuary-dark transition btn-press border border-sanctuary-border"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-4 h-4 stroke-[2.5]" />
             </button>
             <button
               onClick={handleNextMonth}
-              className="p-1.5 rounded-lg hover:bg-black/5 text-sanctuary-muted transition"
+              className="p-2 rounded-xl hover:bg-black/5 text-sanctuary-dark transition btn-press border border-sanctuary-border"
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-4 h-4 stroke-[2.5]" />
             </button>
           </div>
         </div>
 
         {/* Weekday Names */}
-        <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-bold text-sanctuary-muted">
+        <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-black text-sanctuary-muted uppercase tracking-wider">
           {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map((d, i) => (
             <div key={i}>{d}</div>
           ))}
         </div>
 
         {/* Days Grid */}
-        <div className="grid grid-cols-7 gap-1 text-center text-xs">
+        <div className="grid grid-cols-7 gap-1.5 text-center text-xs">
           {monthDays.map((cell, idx) => {
             const isSelected = formatDateKey(cell.date) === selectedDateKey;
 
@@ -115,19 +115,19 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
               <button
                 key={idx}
                 onClick={() => handleSelectDay(cell.date)}
-                className={`py-2 rounded-xl flex flex-col items-center justify-center transition ${
+                className={`py-2.5 rounded-xl flex flex-col items-center justify-center transition btn-press ${
                   isSelected
-                    ? 'bg-sanctuary-green text-white font-bold shadow-xs'
+                    ? 'bg-sanctuary-green text-white font-black shadow-md shadow-sanctuary-green/25 scale-[1.05]'
                     : cell.isToday
-                    ? 'bg-emerald-100/80 text-sanctuary-dark font-bold'
+                    ? 'bg-emerald-100/90 text-sanctuary-dark font-black border border-emerald-300'
                     : cell.isCurrentMonth
-                    ? 'text-sanctuary-dark hover:bg-black/5'
-                    : 'text-gray-300'
+                    ? 'text-sanctuary-dark font-bold hover:bg-black/5'
+                    : 'text-gray-300 font-medium'
                 }`}
               >
-                <span>{cell.dayNumber}</span>
+                <span className="font-mono text-sm">{cell.dayNumber}</span>
                 {cell.isToday && !isSelected && (
-                  <span className="w-1 h-1 rounded-full bg-sanctuary-green mt-0.5" />
+                  <span className="w-1.5 h-1.5 rounded-full bg-sanctuary-green mt-0.5" />
                 )}
               </button>
             );
@@ -136,17 +136,17 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
       </div>
 
       {/* Selected Day Agenda */}
-      <div className="space-y-2">
+      <div className="space-y-2.5">
         <div className="flex items-center justify-between text-xs px-1">
-          <span className="font-bold text-sanctuary-dark">
+          <span className="font-black text-sanctuary-dark text-sm tracking-tight">
             Расписание на{' '}
             {selectedDate.toLocaleDateString('ru-RU', {
               day: 'numeric',
               month: 'long',
             })}
           </span>
-          <span className="text-sanctuary-muted text-[11px]">
-            {completedCount} из {habits.length} выполнено
+          <span className="text-sanctuary-muted font-bold text-xs bg-gray-100 px-2 py-0.5 rounded-md">
+            {completedCount}/{habits.length}
           </span>
         </div>
 
@@ -154,10 +154,14 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
           {habits.map((h) => (
             <div
               key={h.id}
-              className="sanctuary-card p-3 flex items-center justify-between"
+              className={`sanctuary-card p-3.5 flex items-center justify-between border-2 transition ${
+                h.isCompleted
+                  ? 'border-sanctuary-green/20 bg-[#fafcfb]'
+                  : 'border-sanctuary-border'
+              }`}
             >
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-gray-100 flex items-center justify-center text-xs">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-[#f4f1eb] border border-sanctuary-border flex items-center justify-center text-xs shadow-inner-soft">
                   {h.icon === 'drop'
                     ? '💧'
                     : h.icon === 'meditate'
@@ -169,8 +173,8 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
                     : '🌙'}
                 </div>
                 <div>
-                  <h4 className="font-bold text-xs text-sanctuary-dark">{h.title}</h4>
-                  <p className="text-[10px] text-sanctuary-muted">
+                  <h4 className="font-extrabold text-xs text-sanctuary-dark tracking-tight">{h.title}</h4>
+                  <p className="text-[11px] font-medium text-sanctuary-muted">
                     {h.alarmTime || h.subtitle}
                   </p>
                 </div>
@@ -181,13 +185,13 @@ export const CalendarScreen: React.FC<CalendarScreenProps> = ({
                   triggerHaptic('impact', 'medium');
                   onToggleHabit(h.id);
                 }}
-                className={`w-7 h-7 rounded-full flex items-center justify-center transition ${
+                className={`w-8 h-8 rounded-full flex items-center justify-center transition btn-press ${
                   h.isCompleted
                     ? 'bg-sanctuary-green text-white shadow-xs'
-                    : 'border-2 border-gray-300 bg-transparent'
+                    : 'border-2 border-gray-300 bg-white'
                 }`}
               >
-                {h.isCompleted && <Check className="w-4 h-4 stroke-[3]" />}
+                {h.isCompleted && <Check className="w-4 h-4 stroke-[3.5]" />}
               </button>
             </div>
           ))}
