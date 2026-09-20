@@ -38,6 +38,11 @@ export interface Translations {
   alarmSubtitle: string;
   testSoundBtn: string;
   addAlarmBtn: string;
+  editAlarmTitle: string;
+  newAlarmTitle: string;
+  deleteAlarmBtn: string;
+  deleteAlarmConfirm: string;
+  alarmSoundLabel: string;
 
   // Add & Edit Habit Modal
   newRitualTitle: string;
@@ -120,6 +125,12 @@ export const translations: Record<Language, Translations> = {
     alarmSubtitle: 'Напоминания и подъем',
     testSoundBtn: 'Тест звука',
     addAlarmBtn: 'Добавить напоминание',
+    editAlarmTitle: 'Редактировать будильник',
+    newAlarmTitle: 'Новый будильник',
+    deleteAlarmBtn: 'Удалить будильник',
+    deleteAlarmConfirm: 'Вы уверены, что хотите удалить этот будильник?',
+    alarmSoundLabel: 'Звук мелодии',
+
 
     newRitualTitle: 'Новый ритуал',
     editRitualTitle: 'Редактировать ритуал',
@@ -198,6 +209,12 @@ export const translations: Record<Language, Translations> = {
     alarmSubtitle: 'Reminders & Wake-up',
     testSoundBtn: 'Test Sound',
     addAlarmBtn: 'Add Reminder',
+    editAlarmTitle: 'Edit Alarm',
+    newAlarmTitle: 'New Alarm',
+    deleteAlarmBtn: 'Delete Alarm',
+    deleteAlarmConfirm: 'Are you sure you want to delete this alarm?',
+    alarmSoundLabel: 'Alarm Sound',
+
 
     newRitualTitle: 'New Ritual',
     editRitualTitle: 'Edit Ritual',
@@ -276,6 +293,12 @@ export const translations: Record<Language, Translations> = {
     alarmSubtitle: 'Eslatma va uyg\'onish',
     testSoundBtn: 'Ovozni tekshirish',
     addAlarmBtn: 'Eslatma qo\'shish',
+    editAlarmTitle: 'Budilnikni tahrirlash',
+    newAlarmTitle: 'Yangi budilnik',
+    deleteAlarmBtn: 'Budilnikni o\'chirish',
+    deleteAlarmConfirm: 'Ushbu budilnikni o\'chirishga ishonchingiz komilmi?',
+    alarmSoundLabel: 'Budilnik kuyi',
+
 
     newRitualTitle: 'Yangi odat',
     editRitualTitle: 'Odatni tahrirlash',
