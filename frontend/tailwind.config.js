@@ -4,32 +4,27 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        dark: {
-          900: '#090a0f',
-          800: '#11131a',
-          700: '#181b24',
-          600: '#232734',
-        },
-        accent: {
-          green: '#10b981',
-          emerald: '#059669',
-          gold: '#f59e0b',
-          blue: '#3b82f6',
-          purple: '#8b5cf6',
-          rose: '#f43f5e',
+        notion: {
+          bg: '#ffffff',
+          sidebar: '#f7f6f3',
+          border: '#e9e9e8',
+          hover: '#f1f1ef',
+          text: '#37352f',
+          muted: '#787774',
+          subtle: '#9b9a97',
+          blue: '#0c66e4',
+          blueBg: '#e8f3ff',
+          green: '#1f845a',
+          greenBg: '#e6f6ee',
+          grayBg: '#f1f1ef',
+          grayText: '#5a5a58',
         }
       },
-      boxShadow: {
-        'glow-green': '0 0 20px -5px rgba(16, 185, 129, 0.3)',
-        'glow-gold': '0 0 20px -5px rgba(245, 158, 11, 0.3)',
-        'glow-blue': '0 0 20px -5px rgba(59, 130, 246, 0.3)',
-      },
       fontFamily: {
-        sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Display"', '"Segoe UI"', 'Roboto', 'sans-serif'],
+        sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
       }
     },
   },
