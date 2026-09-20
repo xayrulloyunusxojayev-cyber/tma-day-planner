@@ -1,0 +1,11 @@
+**/node_modules
+**/venv
+**/.venv
+**/__pycache__
+**/*.db
+**/*.db-wal
+**/*.db-shm
+.git
+.gitignore
+README.md
+GLOBAL_MEMORY.md
