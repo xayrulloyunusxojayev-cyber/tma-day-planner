@@ -7,9 +7,13 @@
 
 ## 2. Архитектура и технологии
 - **Bot Token:** `8985992778:AAHx829I6VBKJTxE5ma6kJ9EbCmITcgHF68`
+- **Bot Username:** `@xayrulo_bot`
+- **GitHub Repository:** `https://github.com/xayrulloyunusxojayev-cyber/tma-day-planner`
+- **Production URL (Render):** `https://tma-day-planner.onrender.com`
 - **Backend:** Python 3.13, FastAPI, aiogram 3.x, aiosqlite (SQLite), APScheduler.
 - **Frontend:** React 18, Vite, TypeScript, Tailwind CSS, Lucide Icons, Telegram WebApp SDK, Web Audio API (для будильника).
-- **Связка:** FastAPI раздает API (`/api/...`) и сбилженный статический фронтенд (`/`), обеспечивая запуск всей системы одной командой.
+- **Связка:** Развернуто на Render.com через Dockerfile. Uvicorn отдает API, статику фронтенда и запускает бота aiogram 3.
+
 
 ## 3. Ключевой функционал
 - **Таблица планов (Schedule Grid):**
