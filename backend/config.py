@@ -8,4 +8,5 @@ PORT = int(os.getenv("PORT", 8000))
 HOST = os.getenv("HOST", "0.0.0.0")
 DATABASE_PATH = os.getenv("DATABASE_PATH", "planner.db")
 # Public URL for WebApp (ngrok / render / local)
-WEBAPP_URL = os.getenv("WEBAPP_URL", "http://localhost:8000")
+WEBAPP_URL = os.getenv("WEBAPP_URL", "https://tma-day-planner.onrender.com")
+
